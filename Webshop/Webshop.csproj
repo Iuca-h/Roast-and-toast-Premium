@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-Webshop-1585e8b1-71a6-4222-98dc-d828dec257d8</UserSecretsId>
+    <UserSecretsId>aspnet-Webshop-de64b72c-6d95-417b-9f67-ec8e414c989b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,16 +13,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.15" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.15" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="11.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.15" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.3" />
-    <PackageReference Include="MySqlConnector" Version="2.5.*" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.*" />
   </ItemGroup>
 
 </Project>
