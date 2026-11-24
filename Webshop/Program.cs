@@ -62,6 +62,9 @@ builder.Services.AddScoped<
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddSingleton<EmailSender>();
 
+// Cart
+builder.Services.AddScoped<CartService>();
+
 // Authorization
 builder.Services.AddAuthorization(options =>
 {

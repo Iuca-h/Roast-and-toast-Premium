@@ -1,0 +1,118 @@
+@page
+@model Webshop.Pages.Cart.IndexModel
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container mt-4">
+
+    <h1 class="mb-4">Shopping Cart</h1>
+
+    @if (Model.ShoppingCart == null ||
+         !Model.ShoppingCart.Items.Any())
+    {
+        <div class="alert alert-info">
+            Your shopping cart is empty.
+        </div>
+
+        <a asp-page="/Products/Index"
+           class="btn btn-primary">
+            Continue Shopping
+        </a>
+    }
+    else
+    {
+        <div class="row">
+
+            <div class="col-lg-8">
+
+                @foreach (var item in Model.ShoppingCart.Items)
+                {
+                    <div class="card mb-3 shadow-sm">
+
+                        <div class="card-body">
+
+                            <div class="row align-items-center">
+
+                                <div class="col-md-6">
+
+                                    <h5>@item.Product.Name</h5>
+
+                                    <p class="text-muted mb-0">
+                                        Model: @item.Product.Model
+                                    </p>
+
+                                </div>
+
+                                <div class="col-md-2">
+
+                                    <span class="text-muted">
+                                        Quantity
+                                    </span>
+
+                                    <p class="fw-bold mb-0">
+                                        @item.Quantity
+                                    </p>
+
+                                </div>
+
+                                <div class="col-md-4">
+
+                                    <span class="text-muted">
+                                        Subtotal
+                                    </span>
+
+                                    <p class="fw-bold text-primary mb-0">
+                                        €@((item.Product.PriceCents *
+                                            (decimal)item.Quantity / 100m).ToString("N2"))
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card shadow-sm">
+
+                    <div class="card-body">
+
+                        <h4>Order Summary</h4>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between">
+
+                            <span>Total:</span>
+
+                            <strong class="text-primary fs-4">
+                                €@Model.TotalPrice.ToString("N2")
+                            </strong>
+
+                        </div>
+
+                        <hr />
+
+                        <a asp-page="/Products/Index"
+                           class="btn btn-outline-secondary w-100 mb-2">
+                            Continue Shopping
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>
