@@ -25,7 +25,7 @@ namespace Webshop.Pages.Admin
         [BindProperty]
         public NewUserInput Input { get; set; } = new();
 
-        public record UserRow(string Id, string Email, IList<string> Roles);
+        public record UserRow(string Id, bool IsVerified, string Email, IList<string> Roles);
 
         public class NewUserInput
         {
@@ -123,7 +123,7 @@ var sent = true;
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-                rows.Add(new UserRow(user.Id, user.Email ?? "", roles));
+                rows.Add(new UserRow(user.Id, user.IsVerified, user.Email ?? "", roles));
             }
 
             Users = rows;
