@@ -58,7 +58,7 @@ using (var scope = app.Services.CreateScope())
 
     await emailSender.SendEmailAsync(
         "kkaappyyssttaaa@gmail.com",
-        "WebShop SMTP Test",
+        "WebShop SMTP Test", 
         "<h1>SMTP works!</h1><p>Your email configuration is successful.</p>"
     );
 }
