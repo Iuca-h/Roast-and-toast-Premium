@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Org.BouncyCastle.Security;
 using Webshop.Data;
 using Webshop.Services;
 
@@ -77,7 +78,7 @@ namespace Webshop.Pages.Admin
             await _emailSender.SendEmailAsync(
     Input.Email,
     "WebShop SMTP Test",
-    "<h1>SMTP works!</h1><p>Your email configuration is successful.</p>"
+    $"<h1>Finish your webshop account!</h1><p>To login use this email and the temporary password: </p><strong>{tempPassword}</strong>"
 );
 
 var sent = true;

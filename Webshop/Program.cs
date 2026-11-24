@@ -54,17 +54,6 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
-
-    await emailSender.SendEmailAsync(
-        "kkaappyyssttaaa@gmail.com",
-        "WebShop SMTP Test",
-        "<h1>SMTP works!</h1><p>Your email configuration is successful.</p>"
-    );
-}
-
-using (var scope = app.Services.CreateScope())
-{
     await RoleSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
 }
 
