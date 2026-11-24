@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Webshop.Data;
 using Webshop.Services;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +73,40 @@ builder.Services.AddSingleton<EmailSender>();
 // Cart
 builder.Services.AddScoped<CartService>();
 
+// Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("PaymentVerification", httpContext =>
+    {
+        // Do not rate-limit GET requests.
+        if (!HttpMethods.IsPost(httpContext.Request.Method))
+        {
+            return RateLimitPartition.GetNoLimiter<string>("payment-get");
+        }
+
+        var userId = httpContext.User.FindFirst(
+            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString()
+            ?? "unknown";
+
+        var partitionKey = $"{userId ?? "anonymous"}:{ipAddress}";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+});
+
+
 // Authorization
 builder.Services.AddAuthorization(options =>
 {
@@ -118,6 +153,7 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapStaticAssets();

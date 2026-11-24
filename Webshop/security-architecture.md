@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-This document describes the security architecture of the Webshop application, focusing on the protection of the checkout and payment processes.
+This document describes the security architecture of the Webshop application, focusing on the protection of checkout and payment processes.
 
 The main objective is to protect user accounts, payment operations, and customer data against common security threats, including brute-force attacks, unauthorized access, and attempts to bypass payment verification.
 
@@ -21,8 +21,6 @@ The security architecture is being extended gradually. Each mechanism is impleme
 #### Purpose
 
 This level protects individual orders against brute-force attacks targeting the simulated 3D Secure verification process.
-
-Without an attempt limit, an attacker could repeatedly submit different verification codes until the correct code is discovered.
 
 #### How It Works
 
@@ -81,32 +79,31 @@ It complements Level 1 by introducing a broader protection scope.
 
 ### Level 3 — HTTP Request Rate Limiting
 
-**Status: Planned — Next Implementation Stage**
+**Status: Implemented**
 
 #### Purpose
 
-This level protects the application against excessive HTTP requests targeting payment-related endpoints.
+This level protects payment-related endpoints against excessive HTTP requests.
 
 Unlike the previous levels, which track incorrect verification codes, this mechanism limits how frequently requests can reach the application.
 
-#### How It Will Work
+#### How It Works
 
-ASP.NET Core Rate Limiting middleware will be configured to restrict the frequency of requests to payment-related endpoints.
+ASP.NET Core Rate Limiting middleware is configured to restrict the frequency of requests to the payment page.
 
-The planned protection includes:
+The current configuration includes:
 
-- Limiting the number of requests within a specified time window.
-- Applying limits based on the authenticated user and IP address.
-- Rejecting excessive requests with HTTP status code `429 Too Many Requests`.
-- Preventing automated clients from submitting requests at an unrestricted rate.
-
-The exact limits will be determined during implementation and testing.
+- A maximum of 10 POST requests per minute for each combined authenticated-user and IP-address partition.
+- GET requests are excluded from this rate limit.
+- Excessive requests are rejected with HTTP status code `429 Too Many Requests`.
+- Requests are partitioned using the authenticated user's ID and the client's IP address.
+- The policy is applied to the payment page.
 
 #### Security Benefit
 
 This mechanism adds protection against automated attacks and excessive request traffic.
 
-It also provides an additional barrier against attempts to bypass the first two protection levels.
+It complements the first two levels by limiting request frequency independently of whether submitted verification codes are correct.
 
 ---
 
@@ -132,7 +129,7 @@ After implementing the three payment security levels, the following improvements
 
 ### 4.1. Race Condition Protection
 
-**Status: Planned**
+**Status: Next Implementation Stage**
 
 Protect payment verification counters and payment operations against simultaneous requests.
 
@@ -156,15 +153,25 @@ Further strengthen payment processing to ensure that:
 
 ### 4.3. Authentication and Account Security
 
-**Status: Planned**
+**Status: Existing Authentication Flow — Further Review Deferred**
 
-Review and strengthen authentication-related protections, including:
+The current account creation and initial password setup process works as follows:
+
+- An administrator creates a user account using the user's email address.
+- A temporary password is sent to the user's email address.
+- The user signs in using the temporary password.
+- The user creates a new personal password that must satisfy the configured password validation requirements.
+- The user can then sign in using the new password.
+
+Further security review is planned for:
 
 - Email confirmation.
 - Login brute-force protection.
 - Password recovery security.
 - Session expiration and invalidation.
 - Protection of sensitive account operations.
+
+Changes to this authentication workflow are deferred because this part of the application is outside the current implementation scope.
 
 ### 4.4. Database Security
 
@@ -217,16 +224,14 @@ Improve the handling of sensitive configuration and security events:
 
 ## 5. Implementation Roadmap
 
-The planned implementation order is:
-
 | Step | Task | Status |
 |---|---|---|
 | 1 | Order-based payment verification lockout | Implemented |
 | 2 | User-based payment verification lockout | Implemented |
-| 3 | HTTP Request Rate Limiting | Next |
-| 4 | Race condition protection | Planned |
+| 3 | HTTP Request Rate Limiting | Implemented |
+| 4 | Race condition protection | Next |
 | 5 | Duplicate payment and payment integrity protection | Planned |
-| 6 | Authentication and account security review | Planned |
+| 6 | Authentication and account security review | Deferred |
 | 7 | Database security review | Planned |
 | 8 | OWASP vulnerability review | Planned |
 | 9 | HTTP security headers | Planned |
@@ -239,16 +244,14 @@ Each stage will be implemented and tested before proceeding to the next one.
 
 ## 6. Implementation and Testing Log
 
-This section records the current implementation status.
-
 | Component | Status |
 |---|---|
 | Order-based verification lockout | Implemented |
 | User-based verification lockout | Implemented |
-| HTTP request rate limiting | Planned |
-| Race condition protection | Planned |
+| HTTP request rate limiting | Implemented |
+| Race condition protection | Next |
 | Duplicate payment prevention improvements | Planned |
-| Authentication security review | Planned |
+| Authentication security review | Deferred |
 | Database security review | Planned |
 | OWASP security review | Planned |
 | HTTP security headers | Planned |

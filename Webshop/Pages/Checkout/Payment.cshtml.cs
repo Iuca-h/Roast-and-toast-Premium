@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Net;
@@ -13,6 +14,7 @@ using Webshop.Data;
 namespace Webshop.Pages.Checkout;
 
 [Authorize]
+[EnableRateLimiting("PaymentVerification")]
 public class PaymentModel : PageModel
 {
     private readonly ApplicationDbContext _context;
@@ -59,6 +61,7 @@ public class PaymentModel : PageModel
 
     public string? PaymentError { get; set; }
 
+    // GET: Display payment page.
     public async Task<IActionResult> OnGetAsync(
         int orderId,
         string? method,
@@ -79,7 +82,6 @@ public class PaymentModel : PageModel
             return NotFound();
 
         OrderId = Order.Id;
-
         PaymentMethod = method ?? "Card";
 
         if (PaymentMethod == "Card")
@@ -109,6 +111,7 @@ public class PaymentModel : PageModel
         return Page();
     }
 
+    // POST: Select payment method.
     public async Task<IActionResult> OnPostAsync()
     {
         var user = await _userManager.GetUserAsync(User);
@@ -137,7 +140,8 @@ public class PaymentModel : PageModel
             return Page();
         }
 
-        return RedirectToPage("/Checkout/Payment",
+        return RedirectToPage(
+            "/Checkout/Payment",
             new
             {
                 orderId = order.Id,
@@ -145,6 +149,7 @@ public class PaymentModel : PageModel
             });
     }
 
+    // POST: Validate test card details.
     public async Task<IActionResult> OnPostProcessCardAsync()
     {
         var user = await _userManager.GetUserAsync(User);
@@ -215,7 +220,8 @@ public class PaymentModel : PageModel
         // Store only the order ID, never card details.
         TempData["CardVerifiedOrderId"] = order.Id;
 
-        return RedirectToPage("/Checkout/Payment",
+        return RedirectToPage(
+            "/Checkout/Payment",
             new
             {
                 orderId = order.Id,
@@ -224,290 +230,227 @@ public class PaymentModel : PageModel
             });
     }
 
-
-public async Task<IActionResult> OnPostVerifyThreeDSecureAsync()
-{
-    var user = await _userManager.GetUserAsync(User);
-
-    if (user == null)
-        return Challenge();
-
-    var order = await _context.Orders
-        .Include(o => o.Items)
-        .FirstOrDefaultAsync(o =>
-            o.Id == OrderId &&
-            o.UserId == user.Id);
-
-    if (order == null)
-        return NotFound();
-
-    // Prevent duplicate payment processing.
-    if (order.OrderStatus == "Paid")
+    // POST: Verify simulated 3D Secure code.
+    public async Task<IActionResult> OnPostVerifyThreeDSecureAsync()
     {
-        return RedirectToPage("/Checkout/Confirmation",
-            new { orderId = order.Id });
-    }
+        var user = await _userManager.GetUserAsync(User);
 
-    if (order.OrderStatus != "Pending")
-        return BadRequest();
+        if (user == null)
+            return Challenge();
 
-    var verifiedOrderId = TempData.Peek("CardVerifiedOrderId");
+        var order = await _context.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o =>
+                o.Id == OrderId &&
+                o.UserId == user.Id);
 
-    if (verifiedOrderId == null ||
-        !int.TryParse(
-            Convert.ToString(verifiedOrderId),
-            out var verifiedId) ||
-        verifiedId != order.Id)
-    {
-        return BadRequest();
-    }
+        if (order == null)
+            return NotFound();
 
-    var now = DateTime.UtcNow;
-
-    // LEVEL 2: Load user-based verification attempts.
-    var userAttempt = await _context.UserPaymentVerificationAttempts
-        .FirstOrDefaultAsync(a => a.UserId == user.Id);
-
-    // Reset expired user lockout or expired 15-minute window.
-    if (userAttempt != null &&
-        ((userAttempt.LockedUntil != null &&
-          userAttempt.LockedUntil <= now) ||
-         userAttempt.WindowStartedAt <= now.AddMinutes(-15)))
-    {
-        userAttempt.FailedAttempts = 0;
-        userAttempt.WindowStartedAt = now;
-        userAttempt.LockedUntil = null;
-        userAttempt.UpdatedAt = now;
-
-        await _context.SaveChangesAsync();
-    }
-
-    // Block all payment verification for this user.
-    if (userAttempt?.LockedUntil > now)
-    {
-        ModelState.AddModelError(
-            nameof(ThreeDSecureCode),
-            "Too many incorrect attempts. Payment verification is temporarily locked for your account.");
-
-        Order = order;
-        PaymentMethod = "Card";
-        ShowThreeDSecure = true;
-
-        return Page();
-    }
-
-    // LEVEL 1: Load order-based verification attempts.
-    var orderAttempt = await _context.PaymentVerificationAttempts
-        .FirstOrDefaultAsync(a => a.OrderId == order.Id);
-
-// Reset expired user lockout or expired 15-minute window.
-if (userAttempt != null)
-{
-    bool lockoutExpired =
-        userAttempt.LockedUntil != null &&
-        userAttempt.LockedUntil <= now;
-
-    bool windowExpired =
-        userAttempt.LockedUntil == null &&
-        userAttempt.WindowStartedAt <= now.AddMinutes(-15);
-
-    if (lockoutExpired || windowExpired)
-    {
-        userAttempt.FailedAttempts = 0;
-        userAttempt.WindowStartedAt = now;
-        userAttempt.LockedUntil = null;
-        userAttempt.UpdatedAt = now;
-
-        await _context.SaveChangesAsync();
-    }
-}
-
-// Block all payment verification for this user.
-if (userAttempt?.LockedUntil > now)
-{
-    ModelState.AddModelError(
-        nameof(ThreeDSecureCode),
-        "Too many incorrect attempts. Payment verification is temporarily locked for your account.");
-
-    Order = order;
-    PaymentMethod = "Card";
-    ShowThreeDSecure = true;
-
-    return Page();
-}
-
-
-    // Block verification for this order.
-    if (orderAttempt?.LockedUntil > now)
-    {
-        ModelState.AddModelError(
-            nameof(ThreeDSecureCode),
-            "Too many incorrect attempts. Please try again in 15 minutes.");
-
-        Order = order;
-        PaymentMethod = "Card";
-        ShowThreeDSecure = true;
-
-        return Page();
-    }
-
-    // Simulate a bank-declined payment.
-    if (ThreeDSecureCode == "000000")
-    {
-        await using var failedTransaction =
-            await _context.Database.BeginTransactionAsync();
-
-        var failedAt = DateTime.UtcNow;
-
-        var failedPayment = new Payment
+        // Prevent duplicate payment processing.
+        if (order.OrderStatus == "Paid")
         {
-            OrderId = order.Id,
-            TransactionId = $"TXN-{Guid.NewGuid():N}",
-            PaymentMethod = "Card",
-            PaymentStatus = "Failed",
-            AmountCents = order.TotalPriceCents,
-            Currency = order.Currency,
-            CardBrand = "Visa",
-            CardLast4 = "4242",
-            CreatedAt = failedAt,
-            ProcessedAt = failedAt
-        };
+            return RedirectToPage(
+                "/Checkout/Confirmation",
+                new { orderId = order.Id });
+        }
 
-        _context.Payments.Add(failedPayment);
+        if (order.OrderStatus != "Pending")
+            return BadRequest();
 
-        await _context.SaveChangesAsync();
-        await failedTransaction.CommitAsync();
+        var verifiedOrderId =
+            TempData.Peek("CardVerifiedOrderId");
 
-        TempData.Remove("CardVerifiedOrderId");
-
-        TempData["PaymentError"] =
-            "Your bank declined the payment. Please try again.";
-
-        return RedirectToPage("/Checkout/Payment",
-            new { orderId = order.Id, method = "Card" });
-    }
-
-    // Handle an incorrect verification code.
-    if (ThreeDSecureCode != "123456")
-    {
-        // Create order attempt record if it does not exist.
-        if (orderAttempt == null)
+        if (verifiedOrderId == null ||
+            !int.TryParse(
+                Convert.ToString(verifiedOrderId),
+                out var verifiedId) ||
+            verifiedId != order.Id)
         {
-            orderAttempt = new PaymentVerificationAttempt
+            return BadRequest();
+        }
+
+        var now = DateTime.UtcNow;
+
+        // LEVEL 2: Load user-based verification attempts.
+        var userAttempt = await _context.UserPaymentVerificationAttempts
+            .FirstOrDefaultAsync(a => a.UserId == user.Id);
+
+        // Reset an expired user lockout or an expired counting window.
+        if (userAttempt != null)
+        {
+            bool lockoutExpired =
+                userAttempt.LockedUntil != null &&
+                userAttempt.LockedUntil <= now;
+
+            bool windowExpired =
+                userAttempt.LockedUntil == null &&
+                userAttempt.WindowStartedAt <= now.AddMinutes(-15);
+
+            if (lockoutExpired || windowExpired)
+            {
+                userAttempt.FailedAttempts = 0;
+                userAttempt.WindowStartedAt = now;
+                userAttempt.LockedUntil = null;
+                userAttempt.UpdatedAt = now;
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Block all payment verification for this user.
+        if (userAttempt?.LockedUntil > now)
+        {
+            ModelState.AddModelError(
+                nameof(ThreeDSecureCode),
+                "Too many incorrect attempts. Payment verification is temporarily locked for your account.");
+
+            Order = order;
+            PaymentMethod = "Card";
+            ShowThreeDSecure = true;
+
+            return Page();
+        }
+
+        // LEVEL 1: Load order-based verification attempts.
+        var orderAttempt = await _context.PaymentVerificationAttempts
+            .FirstOrDefaultAsync(a => a.OrderId == order.Id);
+
+        // Reset an expired order lockout.
+        if (orderAttempt?.LockedUntil != null &&
+            orderAttempt.LockedUntil <= now)
+        {
+            orderAttempt.FailedAttempts = 0;
+            orderAttempt.LockedUntil = null;
+            orderAttempt.UpdatedAt = now;
+
+            await _context.SaveChangesAsync();
+        }
+
+        // Block verification for this order.
+        if (orderAttempt?.LockedUntil > now)
+        {
+            ModelState.AddModelError(
+                nameof(ThreeDSecureCode),
+                "Too many incorrect attempts. Please try again in 15 minutes.");
+
+            Order = order;
+            PaymentMethod = "Card";
+            ShowThreeDSecure = true;
+
+            return Page();
+        }
+
+        // Simulate a bank-declined payment.
+        if (ThreeDSecureCode == "000000")
+        {
+            await using var failedTransaction =
+                await _context.Database.BeginTransactionAsync();
+
+            var failedAt = DateTime.UtcNow;
+
+            var failedPayment = new Payment
             {
                 OrderId = order.Id,
-                FailedAttempts = 0,
-                CreatedAt = now,
-                UpdatedAt = now
+                TransactionId = $"TXN-{Guid.NewGuid():N}",
+                PaymentMethod = "Card",
+                PaymentStatus = "Failed",
+                AmountCents = order.TotalPriceCents,
+                Currency = order.Currency,
+                CardBrand = "Visa",
+                CardLast4 = "4242",
+                CreatedAt = failedAt,
+                ProcessedAt = failedAt
             };
 
-            _context.PaymentVerificationAttempts.Add(orderAttempt);
+            _context.Payments.Add(failedPayment);
+
+            await _context.SaveChangesAsync();
+            await failedTransaction.CommitAsync();
+
+            TempData.Remove("CardVerifiedOrderId");
+
+            TempData["PaymentError"] =
+                "Your bank declined the payment. Please try again.";
+
+            return RedirectToPage(
+                "/Checkout/Payment",
+                new
+                {
+                    orderId = order.Id,
+                    method = "Card"
+                });
         }
 
-        // Increment order-based counter.
-        orderAttempt.FailedAttempts++;
-        orderAttempt.UpdatedAt = now;
-
-        if (orderAttempt.FailedAttempts >= 5)
+        // Handle an incorrect verification code.
+        if (ThreeDSecureCode != "123456")
         {
-            orderAttempt.LockedUntil = now.AddMinutes(15);
-        }
-
-        // Create user attempt record if it does not exist.
-        if (userAttempt == null)
-        {
-            userAttempt = new UserPaymentVerificationAttempt
+            // Create order attempt record if it does not exist.
+            if (orderAttempt == null)
             {
-                UserId = user.Id,
-                FailedAttempts = 0,
-                WindowStartedAt = now,
-                CreatedAt = now,
-                UpdatedAt = now
-            };
+                orderAttempt = new PaymentVerificationAttempt
+                {
+                    OrderId = order.Id,
+                    FailedAttempts = 0,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
 
-            _context.UserPaymentVerificationAttempts.Add(userAttempt);
-        }
+                _context.PaymentVerificationAttempts.Add(orderAttempt);
+            }
 
-        // Increment user-based counter.
-        userAttempt.FailedAttempts++;
-        userAttempt.UpdatedAt = now;
+            // Increment order-based counter.
+            orderAttempt.FailedAttempts++;
+            orderAttempt.UpdatedAt = now;
 
-        if (userAttempt.FailedAttempts >= 10)
-        {
-            userAttempt.LockedUntil = now.AddMinutes(15);
-        }
+            if (orderAttempt.FailedAttempts >= 5)
+            {
+                orderAttempt.LockedUntil = now.AddMinutes(15);
+            }
 
-        await _context.SaveChangesAsync();
+            // Create user attempt record if it does not exist.
+            if (userAttempt == null)
+            {
+                userAttempt = new UserPaymentVerificationAttempt
+                {
+                    UserId = user.Id,
+                    FailedAttempts = 0,
+                    WindowStartedAt = now,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
 
-        if (userAttempt.LockedUntil != null)
-        {
-            ModelState.AddModelError(
-                nameof(ThreeDSecureCode),
-                "Too many incorrect attempts. Payment verification is locked for your account for 15 minutes.");
-        }
-        else if (orderAttempt.LockedUntil != null)
-        {
-            ModelState.AddModelError(
-                nameof(ThreeDSecureCode),
-                "Too many incorrect attempts. This order is locked for 15 minutes.");
-        }
-        else
-        {
-            ModelState.AddModelError(
-                nameof(ThreeDSecureCode),
-                $"Invalid verification code. {5 - orderAttempt.FailedAttempts} attempts remaining for this order.");
-        }
+                _context.UserPaymentVerificationAttempts.Add(userAttempt);
+            }
 
-        Order = order;
-        PaymentMethod = "Card";
-        ShowThreeDSecure = true;
+            // Increment user-based counter.
+            userAttempt.FailedAttempts++;
+            userAttempt.UpdatedAt = now;
 
-        return Page();
-    }
+            if (userAttempt.FailedAttempts >= 10)
+            {
+                userAttempt.LockedUntil = now.AddMinutes(15);
+            }
 
-    // Correct verification code.
-    await using var transaction =
-        await _context.Database.BeginTransactionAsync();
+            await _context.SaveChangesAsync();
 
-    // Check again before creating the payment.
-    bool paymentAlreadyExists = await _context.Payments.AnyAsync(p =>
-        p.OrderId == order.Id &&
-        p.PaymentStatus == "Succeeded");
-
-    if (paymentAlreadyExists)
-    {
-        await transaction.RollbackAsync();
-
-        return RedirectToPage("/Checkout/Confirmation",
-            new { orderId = order.Id });
-    }
-
-    // Save shipping details to the user's profile only if requested.
-    bool saveToProfile =
-        TempData["SaveToProfile"] is bool save && save;
-
-    if (saveToProfile)
-    {
-        user.FirstName = order.FirstName;
-        user.LastName = order.LastName;
-        user.PhoneNumber = order.PhoneNumber;
-        user.Country = order.Country;
-        user.City = order.City;
-        user.StreetAddress = order.StreetAddress;
-        user.PostalCode = order.PostalCode;
-        user.AdditionalInformation = order.AdditionalInformation;
-
-        var updateResult = await _userManager.UpdateAsync(user);
-
-        if (!updateResult.Succeeded)
-        {
-            await transaction.RollbackAsync();
-
-            foreach (var error in updateResult.Errors)
+            if (userAttempt.LockedUntil != null)
             {
                 ModelState.AddModelError(
-                    string.Empty,
-                    error.Description);
+                    nameof(ThreeDSecureCode),
+                    "Too many incorrect attempts. Payment verification is locked for your account for 15 minutes.");
+            }
+            else if (orderAttempt.LockedUntil != null)
+            {
+                ModelState.AddModelError(
+                    nameof(ThreeDSecureCode),
+                    "Too many incorrect attempts. This order is locked for 15 minutes.");
+            }
+            else
+            {
+                ModelState.AddModelError(
+                    nameof(ThreeDSecureCode),
+                    $"Invalid verification code. {5 - orderAttempt.FailedAttempts} attempts remaining for this order.");
             }
 
             Order = order;
@@ -516,75 +459,130 @@ if (userAttempt?.LockedUntil > now)
 
             return Page();
         }
+
+        // Correct verification code.
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
+        // Check again before creating the payment.
+        bool paymentAlreadyExists = await _context.Payments.AnyAsync(p =>
+            p.OrderId == order.Id &&
+            p.PaymentStatus == "Succeeded");
+
+        if (paymentAlreadyExists)
+        {
+            await transaction.RollbackAsync();
+
+            return RedirectToPage(
+                "/Checkout/Confirmation",
+                new { orderId = order.Id });
+        }
+
+        // Save shipping details to the user's profile only if requested.
+        bool saveToProfile =
+            TempData["SaveToProfile"] is bool save && save;
+
+        if (saveToProfile)
+        {
+            user.FirstName = order.FirstName;
+            user.LastName = order.LastName;
+            user.PhoneNumber = order.PhoneNumber;
+            user.Country = order.Country;
+            user.City = order.City;
+            user.StreetAddress = order.StreetAddress;
+            user.PostalCode = order.PostalCode;
+            user.AdditionalInformation = order.AdditionalInformation;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                await transaction.RollbackAsync();
+
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        error.Description);
+                }
+
+                Order = order;
+                PaymentMethod = "Card";
+                ShowThreeDSecure = true;
+
+                return Page();
+            }
+        }
+
+        var paymentTime = DateTime.UtcNow;
+
+        var payment = new Payment
+        {
+            OrderId = order.Id,
+            TransactionId = $"TXN-{Guid.NewGuid():N}",
+            PaymentMethod = "Card",
+            PaymentStatus = "Succeeded",
+            AmountCents = order.TotalPriceCents,
+            Currency = order.Currency,
+            CardBrand = "Visa",
+            CardLast4 = "4242",
+            CreatedAt = paymentTime,
+            ProcessedAt = paymentTime
+        };
+
+        _context.Payments.Add(payment);
+
+        order.OrderStatus = "Paid";
+        order.UpdatedAt = paymentTime;
+
+        // Remove order-based attempts after successful payment.
+        if (orderAttempt != null)
+        {
+            _context.PaymentVerificationAttempts.Remove(orderAttempt);
+        }
+
+        // Keep the user-based counter until its 15-minute window expires.
+
+        var cart = await _context.Carts
+            .Include(c => c.Items)
+            .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+        if (cart != null)
+        {
+            _context.CartItems.RemoveRange(cart.Items);
+        }
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        // Send confirmation email only after successful payment.
+        try
+        {
+            var emailHtml = BuildOrderConfirmationEmail(order, payment);
+
+            await _emailSender.SendEmailAsync(
+                order.Email,
+                $"Order confirmation - {order.OrderNumber}",
+                emailHtml);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Payment succeeded, but confirmation email failed for order {OrderId}.",
+                order.Id);
+
+            TempData["EmailWarning"] =
+                "Your payment was successful, but we couldn't send the confirmation email. You can view your order in My Orders.";
+        }
+
+        TempData.Remove("CardVerifiedOrderId");
+        TempData.Remove("SaveToProfile");
+
+        return RedirectToPage(
+            "/Checkout/Confirmation",
+            new { orderId = order.Id });
     }
-
-    var paymentTime = DateTime.UtcNow;
-
-    var payment = new Payment
-    {
-        OrderId = order.Id,
-        TransactionId = $"TXN-{Guid.NewGuid():N}",
-        PaymentMethod = "Card",
-        PaymentStatus = "Succeeded",
-        AmountCents = order.TotalPriceCents,
-        Currency = order.Currency,
-        CardBrand = "Visa",
-        CardLast4 = "4242",
-        CreatedAt = paymentTime,
-        ProcessedAt = paymentTime
-    };
-
-    _context.Payments.Add(payment);
-
-    order.OrderStatus = "Paid";
-    order.UpdatedAt = paymentTime;
-
-    // Remove order-based attempts after successful payment.
-    if (orderAttempt != null)
-    {
-        _context.PaymentVerificationAttempts.Remove(orderAttempt);
-    }
-
-    // Keep the user-based counter until its 15-minute window expires.
-    var cart = await _context.Carts
-        .Include(c => c.Items)
-        .FirstOrDefaultAsync(c => c.UserId == user.Id);
-
-    if (cart != null)
-    {
-        _context.CartItems.RemoveRange(cart.Items);
-    }
-
-    await _context.SaveChangesAsync();
-    await transaction.CommitAsync();
-
-    // Send confirmation email only after successful payment.
-    try
-    {
-        var emailHtml = BuildOrderConfirmationEmail(order, payment);
-
-        await _emailSender.SendEmailAsync(
-            order.Email,
-            $"Order confirmation - {order.OrderNumber}",
-            emailHtml);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(
-            ex,
-            "Payment succeeded, but confirmation email failed for order {OrderId}.",
-            order.Id);
-
-        TempData["EmailWarning"] =
-            "Your payment was successful, but we couldn't send the confirmation email. You can view your order in My Orders.";
-    }
-
-    TempData.Remove("CardVerifiedOrderId");
-    TempData.Remove("SaveToProfile");
-
-    return RedirectToPage("/Checkout/Confirmation",
-        new { orderId = order.Id });
-}
 
     private string BuildOrderConfirmationEmail(Order order, Payment payment)
     {
@@ -606,7 +604,6 @@ if (userAttempt?.LockedUntil > now)
             <html>
             <body style="font-family: Arial, sans-serif; color: #333;">
                 <h2>Thank you for your order, {Safe(order.FirstName)}!</h2>
-
                 <p>Your payment was successful and your order has been confirmed.</p>
 
                 <h3>Order details</h3>
