@@ -48,11 +48,8 @@ public class SetupModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        Console.WriteLine("SETUP POST STARTED");
 
         var userId = HttpContext.Session.GetString(UserKey);
-
-        Console.WriteLine($"User ID exists: {userId != null}");
 
         if (userId is null)
             return RedirectToPage("./Login");
@@ -113,5 +110,32 @@ public class SetupModel : PageModel
         await _signInManager.SignInAsync(user, isPersistent: false);
 
         return RedirectToPage("./Manage/EnableAuthenticator");
+    }
+
+    public async Task<IActionResult> OnPostCheckPasswordAsync(string? password)
+    {
+        var userId = HttpContext.Session.GetString(UserKey);
+
+        if (userId is null)
+            return new JsonResult(new { valid = false, errors = new[] { "Session expired." } })
+            { StatusCode = StatusCodes.Status401Unauthorized };
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user is null)
+            return new JsonResult(new { valid = false, errors = new[] { "User not found." } })
+            { StatusCode = StatusCodes.Status404NotFound };
+
+        password ??= "";
+
+        var errors = new List<string>();
+
+        foreach (var validator in _userManager.PasswordValidators)
+        {
+            var result = await validator.ValidateAsync(_userManager, user, password);
+            errors.AddRange(result.Errors.Select(e => e.Description));
+        }
+
+        return new JsonResult(new { valid = errors.Count == 0, errors });
     }
 }

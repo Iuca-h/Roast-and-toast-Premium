@@ -7,7 +7,7 @@
 <h1>Set up your account</h1>
 <p>Enter the temporary password you were given, then choose a new password. After that you'll connect an authenticator app.</p>
 
-<form method="post">
+<form method="post" id="setupForm">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="mb-3">
@@ -19,8 +19,107 @@
     <div class="mb-3">
         <label asp-for="Input.NewPassword" class="form-label"></label>
         <input asp-for="Input.NewPassword" class="form-control" autocomplete="new-password" />
+
+        <div class="progress mt-2" style="height: 10px;">
+            <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%"></div>
+        </div>
+        <div id="passwordMessage" class="small mt-1" aria-live="polite"></div>
+
         <span asp-validation-for="Input.NewPassword" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Continue</button>
+    <button id="continueSubmit" type="submit" class="btn btn-primary" disabled>Continue</button>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function () {
+            const form = document.getElementById("setupForm");
+            const newInput = document.getElementById("Input_NewPassword");
+            const submitButton = document.getElementById("continueSubmit");
+            const progressBar = document.getElementById("passwordStrength");
+            const message = document.getElementById("passwordMessage");
+
+            const tokenInput = form.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : "";
+
+            let timeout = null;
+            let requestNumber = 0;
+            let passwordValid = false;
+
+            function render(width, barClass, text, textClass) {
+                progressBar.style.width = width;
+                progressBar.className = "progress-bar " + barClass;
+                message.className = "small mt-1 " + textClass;
+                message.textContent = text;
+                submitButton.disabled = !passwordValid;
+            }
+
+            function reset() {
+                passwordValid = false;
+                progressBar.style.width = "0%";
+                progressBar.className = "progress-bar";
+                message.textContent = "";
+                submitButton.disabled = true;
+            }
+
+            async function checkPassword() {
+                const password = newInput.value;
+                const currentRequest = ++requestNumber;
+
+                if (!password) {
+                    reset();
+                    return;
+                }
+
+                passwordValid = false;
+                render("30%", "bg-danger", "Checking...", "text-muted");
+
+                try {
+                    const response = await fetch("?handler=CheckPassword", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams({
+                            password: password,
+                            __RequestVerificationToken: token
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Password validation failed.");
+                    }
+
+                    const result = await response.json();
+
+                    // Ignore responses for a password the user has since changed
+                    if (currentRequest !== requestNumber) return;
+
+                    if (result.valid) {
+                        passwordValid = true;
+                        render("100%", "bg-success", "Strong password!", "text-success");
+                    } else {
+                        const width = password.length >= 12 ? "75%" : "40%";
+                        const barClass = password.length >= 12 ? "bg-warning" : "bg-danger";
+                        render(width, barClass, result.errors?.[0] || "Invalid password.", "text-danger");
+                    }
+                } catch (error) {
+                    if (currentRequest !== requestNumber) return;
+                    passwordValid = false;
+                    render("100%", "bg-danger", "Could not validate password.", "text-danger");
+                }
+            }
+
+            newInput.addEventListener("input", () => {
+                // Invalidate any request still in flight
+                requestNumber++;
+                passwordValid = false;
+                submitButton.disabled = true;
+
+                clearTimeout(timeout);
+                timeout = setTimeout(checkPassword, 300);
+            });
+        })();
+    </script>
+}
