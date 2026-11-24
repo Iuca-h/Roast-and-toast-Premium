@@ -1,3 +1,4 @@
+
 @page
 @model Webshop.Pages.Cart.IndexModel
 
@@ -35,7 +36,7 @@
 
                             <div class="row align-items-center">
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
 
                                     <h5>@item.Product.Name</h5>
 
@@ -43,17 +44,45 @@
                                         Model: @item.Product.Model
                                     </p>
 
+                                    <p class="text-primary fw-bold mt-2 mb-0">
+                                        €@((item.Product.PriceCents / 100m).ToString("N2"))
+                                    </p>
+
                                 </div>
 
-                                <div class="col-md-2">
+                                <div class="col-md-4">
 
                                     <span class="text-muted">
                                         Quantity
                                     </span>
 
-                                    <p class="fw-bold mb-0">
-                                        @item.Quantity
-                                    </p>
+                                    <div class="d-flex align-items-center gap-2 mt-2">
+
+                                        <form method="post"
+                                              asp-page-handler="Decrease"
+                                              asp-route-id="@item.Id">
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-secondary btn-sm">
+                                                −
+                                            </button>
+
+                                        </form>
+
+                                        <strong>@item.Quantity</strong>
+
+                                        <form method="post"
+                                              asp-page-handler="Increase"
+                                              asp-route-id="@item.Id">
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-secondary btn-sm">
+                                                +
+                                            </button>
+
+                                        </form>
+
+                                    </div>
 
                                 </div>
 
@@ -101,8 +130,13 @@
 
                         <hr />
 
+                        <a asp-page="/Checkout/Index"
+                           class="btn btn-success w-100 mb-2">
+                            Proceed to Checkout
+                        </a>
+
                         <a asp-page="/Products/Index"
-                           class="btn btn-outline-secondary w-100 mb-2">
+                           class="btn btn-outline-secondary w-100">
                             Continue Shopping
                         </a>
 
