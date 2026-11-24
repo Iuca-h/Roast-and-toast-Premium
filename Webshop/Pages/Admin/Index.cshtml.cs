@@ -3,16 +3,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Webshop.Data;
+using Webshop.Services;
+using System.Security.Claims;
+using Webshop.Data;
 
 namespace Webshop.Pages.Admin
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly EmailSender _emailSender;
 
-        public IndexModel(UserManager<IdentityUser> userManager)
+        public IndexModel(UserManager<ApplicationUser> userManager, EmailSender emailSender)
         {
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         public List<UserRow> Users { get; set; } = new();
@@ -26,9 +31,6 @@ namespace Webshop.Pages.Admin
         {
             [Required, EmailAddress]
             public string Email { get; set; } = "";
-
-            [Required, DataType(DataType.Password)]
-            public string Password { get; set; } = "";
         }
 
         public async Task OnGetAsync()
@@ -36,7 +38,7 @@ namespace Webshop.Pages.Admin
             await LoadUsersAsync();
         }
 
-        // Creates a user. The role is hardcoded to User, so the form can't choose another.
+        // Creates a User-role account with a generated password and emails it.
         public async Task<IActionResult> OnPostCreateAsync()
         {
             if (!ModelState.IsValid)
@@ -45,14 +47,16 @@ namespace Webshop.Pages.Admin
                 return Page();
             }
 
-            var user = new IdentityUser
+            var tempPassword = PasswordHelper.Generate();
+
+            var user = new ApplicationUser
             {
                 UserName = Input.Email,
                 Email = Input.Email,
                 EmailConfirmed = true
             };
 
-            var createResult = await _userManager.CreateAsync(user, Input.Password);
+            var createResult = await _userManager.CreateAsync(user, tempPassword);
             if (!createResult.Succeeded)
             {
                 foreach (var error in createResult.Errors)
@@ -72,7 +76,18 @@ namespace Webshop.Pages.Admin
                 return Page();
             }
 
-            TempData["Message"] = $"Created {Input.Email} with role User.";
+            await _emailSender.SendEmailAsync(
+                    Input.Email,
+                    "WebShop SMTP Test",
+                    $"<h1>Finish your webshop account!</h1><p>To login use this email and the temporary password: </p><strong>{tempPassword}</strong>"
+                );
+
+var sent = true;
+
+            TempData["Message"] = sent
+                ? $"Created {Input.Email} and emailed a temporary password."
+                : $"Created {Input.Email}. Email failed, so the temporary password is in the console.";
+
             return RedirectToPage();
         }
 

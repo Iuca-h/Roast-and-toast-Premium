@@ -1,18 +1,32 @@
+
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using MySql.EntityFrameworkCore.Extensions;
 using Webshop.Data;
+using Webshop.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Session
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(20);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Identity password settings
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequiredLength = 12;
@@ -45,18 +59,24 @@ builder.Services.AddScoped<
     IPasswordValidator<IdentityUser>,
     StrongPasswordValidator>();
 
+// Email
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddSingleton<EmailSender>();
+
+// Authorization
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(RoleSeeder.AdminRole, policy => policy.RequireRole(RoleSeeder.AdminRole));
-    options.AddPolicy(RoleSeeder.DbaRole, policy => policy.RequireRole(RoleSeeder.DbaRole));
+    options.AddPolicy(RoleSeeder.AdminRole, policy =>
+        policy.RequireRole(RoleSeeder.AdminRole));
+
+    options.AddPolicy(RoleSeeder.DbaRole, policy =>
+        policy.RequireRole(RoleSeeder.DbaRole));
+
+    options.AddPolicy("AdminOrDba", policy =>
+        policy.RequireRole("Admin", "DBA"));
 });
 
-// policy for /Dba
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOrDba", policy => policy.RequireRole("Admin", "DBA"));
-});
-
+// Razor Pages
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/Admin", "AdminOrDba");
@@ -65,12 +85,13 @@ builder.Services.AddRazorPages(options =>
 
 var app = builder.Build();
 
+// Seed roles and users
 using (var scope = app.Services.CreateScope())
 {
     await RoleSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
 }
 
-// Configure the HTTP request pipeline.
+// Configure HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -78,7 +99,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -86,6 +106,9 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseSession();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

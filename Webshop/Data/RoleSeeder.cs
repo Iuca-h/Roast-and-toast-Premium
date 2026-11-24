@@ -15,7 +15,7 @@ public static class RoleSeeder
         IConfiguration config)
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
         // Create roles if they don't exist
         foreach (var role in new[] { UserRole, AdminRole, DbaRole })
@@ -57,13 +57,7 @@ public static class RoleSeeder
 
             if (user is null)
             {
-                user = new IdentityUser
-                {
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true
-                };
-
+                user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true, IsVerified = true };
                 var createResult = await userManager.CreateAsync(user, password);
 
                 if (!createResult.Succeeded)

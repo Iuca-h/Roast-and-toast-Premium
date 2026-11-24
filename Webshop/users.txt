@@ -4,3 +4,7 @@ dotnet user-secrets set "SeedAdmin:Email" "admin@example.com"
 dotnet user-secrets set "SeedAdmin:Password" "Adminpassword123!"
 dotnet user-secrets set "SeedUser:Email" "user@example.com"
 dotnet user-secrets set "SeedUser:Password" "Userpassword123!"
+
+
+dotnet user-secrets set "Smtp:User" "kkaappyyssttaaa@gmail.com"
+dotnet user-secrets set "Smtp:Password" "xygs ihff zjxp eopv"
