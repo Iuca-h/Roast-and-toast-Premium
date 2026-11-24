@@ -153,6 +153,37 @@ namespace Webshop.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
+        
+        
+public async Task<IActionResult> OnPostCheckPasswordAsync(
+    string? password,
+    string? email)
+{
+    var user = new IdentityUser
+    {
+        UserName = email,
+        Email = email
+    };
+
+    var errors = new List<string>();
+
+    foreach (var validator in _userManager.PasswordValidators)
+    {
+        var result = await validator.ValidateAsync(
+            _userManager,
+            user,
+            password);
+
+        errors.AddRange(result.Errors.Select(e => e.Description));
+    }
+
+    return new JsonResult(new
+    {
+        valid = errors.Count == 0,
+        errors
+    });
+}
+
 
         private IdentityUser CreateUser()
         {
