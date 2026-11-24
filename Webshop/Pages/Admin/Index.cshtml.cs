@@ -74,7 +74,13 @@ namespace Webshop.Pages.Admin
                 return Page();
             }
 
-            var sent = await _emailSender.SendTemporaryPasswordAsync(Input.Email, tempPassword);
+            await _emailSender.SendEmailAsync(
+    Input.Email,
+    "WebShop SMTP Test",
+    "<h1>SMTP works!</h1><p>Your email configuration is successful.</p>"
+);
+
+var sent = true;
 
             TempData["Message"] = sent
                 ? $"Created {Input.Email} and emailed a temporary password."

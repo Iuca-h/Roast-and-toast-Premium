@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using MySql.EntityFrameworkCore.Extensions;
 using Webshop.Data;
-using Microsoft.VisualStudio.SolutionPersistence.Model;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Webshop.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +27,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
-    // builder.Services.AddTransient<IEmailSender, EmailSender>();
+    builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -51,6 +51,17 @@ builder.Services.AddRazorPages(options =>
 builder.Services.AddSingleton<Webshop.Services.EmailSender>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
+
+    await emailSender.SendEmailAsync(
+        "kkaappyyssttaaa@gmail.com",
+        "WebShop SMTP Test",
+        "<h1>SMTP works!</h1><p>Your email configuration is successful.</p>"
+    );
+}
 
 using (var scope = app.Services.CreateScope())
 {

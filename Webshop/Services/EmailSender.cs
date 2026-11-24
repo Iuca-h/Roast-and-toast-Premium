@@ -1,36 +1,46 @@
 using System.Net;
 using System.Net.Mail;
+using System.Text;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace Webshop.Services;
 
-public class EmailSender
+public class EmailSender : IEmailSender
 {
     private readonly IConfiguration _config;
     private readonly ILogger<EmailSender> _logger;
 
-    public EmailSender(IConfiguration config, ILogger<EmailSender> logger)
+    public EmailSender(
+        IConfiguration config,
+        ILogger<EmailSender> logger)
     {
         _config = config;
         _logger = logger;
     }
 
-    // Returns true if the email was sent. Never throws, so user creation can't crash.
-    public async Task<bool> SendTemporaryPasswordAsync(string email, string tempPassword)
+    public async Task SendEmailAsync(
+        string email,
+        string subject,
+        string htmlMessage)
     {
-        var body = "Your WebShop account has been created.\n\n" +
-                   $"Temporary password: {tempPassword}\n\n" +
-                   "Please log in and change it as soon as possible.";
-
-        // Always show the password in the console, so you can log in during development
-        Console.WriteLine($"[EMAIL] To: {email}");
-        Console.WriteLine($"[EMAIL] Temporary password: {tempPassword}");
-
         var host = _config["Smtp:Host"];
         var from = _config["Smtp:From"];
-        if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
+        var user = _config["Smtp:User"];
+        var password = _config["Smtp:Password"];
+
+        if (string.IsNullOrWhiteSpace(host) ||
+            string.IsNullOrWhiteSpace(from) ||
+            string.IsNullOrWhiteSpace(user) ||
+            string.IsNullOrWhiteSpace(password))
         {
-            Console.WriteLine("[EMAIL] SMTP not configured, email not sent.");
-            return false;
+            throw new InvalidOperationException(
+                "SMTP configuration is incomplete.");
+        }
+
+        if (!int.TryParse(_config["Smtp:Port"], out var port))
+        {
+            throw new InvalidOperationException(
+                "Invalid SMTP port.");
         }
 
         try
@@ -38,26 +48,30 @@ public class EmailSender
             using var message = new MailMessage
             {
                 From = new MailAddress(from),
-                Subject = "Your WebShop account",
-                Body = body,
+                Subject = subject,
+                Body = htmlMessage,
+                IsBodyHtml = true,
+                BodyEncoding = Encoding.UTF8,
+                SubjectEncoding = Encoding.UTF8
             };
-            message.To.Add(email);
 
-            using var client = new SmtpClient(host, int.Parse(_config["Smtp:Port"] ?? "587"))
+            message.To.Add(new MailAddress(email));
+
+            using var client = new SmtpClient(host, port)
             {
                 EnableSsl = true,
-                Credentials = new NetworkCredential(_config["Smtp:User"], _config["Smtp:Password"]),
+                Credentials = new NetworkCredential(user, password)
             };
 
             await client.SendMailAsync(message);
-            Console.WriteLine("[EMAIL] Sent.");
-            return true;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Could not send email to {Email}", email);
-            Console.WriteLine($"[EMAIL] Send failed: {ex.Message}");
-            return false;
+            _logger.LogError(
+                ex,
+                "Failed to send email.");
+
+            throw;
         }
     }
 }
