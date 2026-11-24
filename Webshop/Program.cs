@@ -31,10 +31,16 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(RoleSeeder.DbaRole, policy => policy.RequireRole(RoleSeeder.DbaRole));
 });
 
+// policy for /Dba
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOrDba", policy => policy.RequireRole("Admin", "DBA"));
+});
+
 builder.Services.AddRazorPages(options =>
 {
-    options.Conventions.AuthorizeFolder("/Admin", RoleSeeder.AdminRole);
-    options.Conventions.AuthorizeFolder("/Dba", RoleSeeder.DbaRole);
+    options.Conventions.AuthorizeFolder("/Admin", "AdminOrDba");
+    options.Conventions.AuthorizeFolder("/Dba", "AdminOrDba");
 });
 
 var app = builder.Build();
