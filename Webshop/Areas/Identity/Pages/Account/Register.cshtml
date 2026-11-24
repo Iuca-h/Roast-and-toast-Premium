@@ -42,11 +42,11 @@
 
                 <label asp-for="Input.Password">Password</label>
 
-                <span asp-validation-for="Input.Password"
-                      class="text-danger"></span>
+                <!-- <span asp-validation-for="Input.Password"
+                      class="text-danger"></span> -->
             </div>
 
-            <div class="progress mb-2" style="height: 10px;">
+            <div class="progress mb-2 mt-2" style="height: 10px;">
                 <div id="passwordStrength"
                      class="progress-bar"
                      role="progressbar"
@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <small id="passwordMessage" class="text-muted"></small>
+            <span id="passwordMessage" class="text-danger"></span>
 
             <div class="form-floating mb-3 mt-3">
                 <input asp-for="Input.ConfirmPassword"
@@ -71,9 +71,12 @@
                       class="text-danger"></span>
             </div>
 
+            <span id="confirmMessage" class="text-danger"></span>
+
             <button id="registerSubmit"
                     type="submit"
-                    class="w-100 btn btn-lg btn-primary">
+                    class="w-100 btn btn-lg btn-primary"
+                    disabled>
                 Register
             </button>
         </form>
@@ -131,14 +134,32 @@
     <script>
         const passwordInput = document.getElementById("Input_Password");
         const emailInput = document.getElementById("Input_Email");
+        const confirmInput = document.getElementById("Input_ConfirmPassword");
 
         const progressBar = document.getElementById("passwordStrength");
         const message = document.getElementById("passwordMessage");
+        const confirmMessage = document.getElementById("confirmMessage");
 
         const form = document.getElementById("registerForm");
+        const registerButton = document.getElementById("registerSubmit");
 
         let timeout;
         let requestNumber = 0;
+        let passwordValid = false;
+
+        function updateRegisterButton() {
+            const passwordsMatch =
+                passwordInput.value === confirmInput.value &&
+                confirmInput.value !== "";
+
+            registerButton.disabled = !(passwordValid && passwordsMatch);
+
+            if (confirmInput.value && !passwordsMatch) {
+                confirmMessage.textContent = "Passwords do not match.";
+            } else {
+                confirmMessage.textContent = "";
+            }
+        }
 
         async function checkPassword() {
             const password = passwordInput.value;
@@ -146,26 +167,21 @@
 
             const currentRequest = ++requestNumber;
 
+            passwordValid = false;
+            updateRegisterButton();
+
             if (!password) {
                 progressBar.style.width = "0%";
                 progressBar.className = "progress-bar";
                 message.textContent = "";
+                updateRegisterButton();
                 return;
             }
 
-            // Initial strength indication
-            let percentage = 20;
-
-            if (password.length >= 6) {
-                percentage = 40;
-            }
-
-            if (password.length >= 12) {
-                percentage = 60;
-            }
-
-            progressBar.style.width = percentage + "%";
+            progressBar.style.width = "30%";
             progressBar.className = "progress-bar bg-danger";
+
+            message.className = "text-muted";
             message.textContent = "Checking...";
 
             const tokenInput = form.querySelector(
@@ -199,41 +215,71 @@
                 }
 
                 if (result.valid) {
+                    passwordValid = true;
+
                     progressBar.style.width = "100%";
                     progressBar.className = "progress-bar bg-success";
-                    message.textContent = "Strong";
-                } else {
-                    if (password.length >= 12) {
-                        progressBar.style.width = "75%";
-                        progressBar.className = "progress-bar bg-warning";
-                    } else {
-                        progressBar.style.width = "40%";
-                        progressBar.className = "progress-bar bg-danger";
-                    }
 
-                    message.textContent = result.errors.join(" ");
+                    message.className = "text-success";
+                    message.textContent = "Strong password!";
+                } else {
+                    passwordValid = false;
+
+                    progressBar.style.width =
+                        password.length >= 12 ? "75%" : "40%";
+
+                    progressBar.className =
+                        password.length >= 12
+                            ? "progress-bar bg-warning"
+                            : "progress-bar bg-danger";
+
+                    message.className = "text-danger";
+
+                    // Show only the first validation error
+                    message.textContent =
+                        result.errors?.[0] || "Invalid password.";
                 }
+
+                updateRegisterButton();
 
             } catch (error) {
                 if (currentRequest !== requestNumber) {
                     return;
                 }
 
+                passwordValid = false;
+
                 progressBar.className = "progress-bar bg-danger";
+                message.className = "text-danger";
                 message.textContent = "Could not validate password.";
+
+                updateRegisterButton();
             }
         }
 
         passwordInput.addEventListener("input", () => {
+            // Invalidate previous requests immediately
+            requestNumber++;
+
+            passwordValid = false;
+            updateRegisterButton();
+
             clearTimeout(timeout);
             timeout = setTimeout(checkPassword, 300);
         });
 
         emailInput.addEventListener("input", () => {
             if (passwordInput.value) {
+                requestNumber++;
+
+                passwordValid = false;
+                updateRegisterButton();
+
                 clearTimeout(timeout);
                 timeout = setTimeout(checkPassword, 300);
             }
         });
+
+        confirmInput.addEventListener("input", updateRegisterButton);
     </script>
 }
