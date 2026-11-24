@@ -1,5 +1,4 @@
-@using Webshop.Data;
-
+@using Webshop.Data
 @inject SignInManager<ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
