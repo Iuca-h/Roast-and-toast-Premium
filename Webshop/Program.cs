@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Webshop.Data;
 using Webshop.Services;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,10 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(20);
+
     options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.IsEssential = true;
 });
 
@@ -52,6 +56,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
+
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 builder.Services.AddScoped<
@@ -61,6 +69,43 @@ builder.Services.AddScoped<
 // Email
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddSingleton<EmailSender>();
+
+// Cart
+builder.Services.AddScoped<CartService>();
+
+// Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("PaymentVerification", httpContext =>
+    {
+        // Do not rate-limit GET requests.
+        if (!HttpMethods.IsPost(httpContext.Request.Method))
+        {
+            return RateLimitPartition.GetNoLimiter<string>("payment-get");
+        }
+
+        var userId = httpContext.User.FindFirst(
+            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString()
+            ?? "unknown";
+
+        var partitionKey = $"{userId ?? "anonymous"}:{ipAddress}";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+});
+
 
 // Authorization
 builder.Services.AddAuthorization(options =>
@@ -88,6 +133,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     await RoleSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+    
 }
 
 // Configure HTTP pipeline
@@ -103,11 +149,41 @@ else
 
 app.UseHttpsRedirection();
 
+// HTTP Security Headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+
+    context.Response.Headers["Referrer-Policy"] =
+        "strict-origin-when-cross-origin";
+
+    context.Response.Headers["Permissions-Policy"] =
+        "camera=(), microphone=(), geolocation=()";
+
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+
+    context.Response.Headers["Content-Security-Policy"] =
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: blob:; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self'; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
+        "form-action 'self'; " +
+        "frame-ancestors 'none'";
+
+    await next();
+});
+
+app.UseRouting();
 app.UseRouting();
 
 app.UseSession();
 
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapStaticAssets();

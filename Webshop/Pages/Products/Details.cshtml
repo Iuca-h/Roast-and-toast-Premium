@@ -1,0 +1,103 @@
+
+@page "{id:int}"
+@model Webshop.Pages.Products.DetailsModel
+
+@{
+    ViewData["Title"] = Model.Product?.Name ?? "Product Details";
+}
+
+<div class="container mt-4">
+
+    <a asp-page="./Index" class="btn btn-outline-secondary mb-4">
+        &larr; Back to Products
+    </a>
+
+    @if (TempData["CartMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["CartMessage"]
+        </div>
+    }
+
+    <div class="row g-5">
+
+        <div class="col-md-6">
+
+            @if (Model.Product!.ImageData != null)
+            {
+                <img src="/Products/Image/@Model.Product.Id"
+                     class="img-fluid rounded shadow-sm"
+                     alt="@Model.Product.Name"
+                     style="max-height: 500px; width: 100%; object-fit: contain;" />
+            }
+            else
+            {
+                <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                     style="height: 400px;">
+                    <span class="text-muted">No image available</span>
+                </div>
+            }
+
+        </div>
+
+        <div class="col-md-6">
+
+            <h1>@Model.Product.Name</h1>
+
+            <p class="text-muted fs-5">
+                Model: @Model.Product.Model
+            </p>
+
+            <h2 class="text-primary my-4">
+                €@((Model.Product.PriceCents / 100m).ToString("N2"))
+            </h2>
+
+            <form method="post"
+                  asp-page-handler="AddToCart"
+                  asp-route-id="@Model.Product.Id">
+
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-cart-plus"></i>
+                    Add to Cart
+                </button>
+
+            </form>
+
+            <hr />
+
+            <h4>Specifications</h4>
+
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Capacity</th>
+                        <td>@Model.Product.Capacity</td>
+                    </tr>
+                    <tr>
+                        <th>Power</th>
+                        <td>@Model.Product.PowerKw kW</td>
+                    </tr>
+                    <tr>
+                        <th>Material</th>
+                        <td>@Model.Product.Material</td>
+                    </tr>
+                    <tr>
+                        <th>Dimensions</th>
+                        <td>@Model.Product.Dimensions</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <hr />
+
+            <h4>Description</h4>
+
+            <p style="white-space: pre-line;">
+                @Model.Product.Description
+            </p>
+
+        </div>
+
+    </div>
+
+</div>

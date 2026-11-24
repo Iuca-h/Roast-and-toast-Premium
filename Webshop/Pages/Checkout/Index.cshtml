@@ -1,0 +1,149 @@
+
+@page
+@model Webshop.Pages.Checkout.IndexModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h1>Checkout</h1>
+
+@if (Model.ShoppingCart != null)
+{
+    <div class="row">
+        <div class="col-md-7">
+            <h3>Shipping Information</h3>
+
+            <form method="post">
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.FirstName"
+                           class="form-label"></label>
+                    <input asp-for="Input.FirstName"
+                           class="form-control" />
+                    <span asp-validation-for="Input.FirstName"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.LastName"
+                           class="form-label"></label>
+                    <input asp-for="Input.LastName"
+                           class="form-control" />
+                    <span asp-validation-for="Input.LastName"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Email"
+                           class="form-label"></label>
+                    <input asp-for="Input.Email"
+                           class="form-control" />
+                    <span asp-validation-for="Input.Email"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.PhoneNumber"
+                           class="form-label"></label>
+                    <input asp-for="Input.PhoneNumber"
+                           class="form-control" />
+                    <span asp-validation-for="Input.PhoneNumber"
+                          class="text-danger"></span>
+                </div>
+
+                <hr />
+
+                <h3>Delivery Address</h3>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Country"
+                           class="form-label"></label>
+                    <input asp-for="Input.Country"
+                           class="form-control" />
+                    <span asp-validation-for="Input.Country"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.City"
+                           class="form-label"></label>
+                    <input asp-for="Input.City"
+                           class="form-control" />
+                    <span asp-validation-for="Input.City"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.StreetAddress"
+                           class="form-label"></label>
+                    <input asp-for="Input.StreetAddress"
+                           class="form-control" />
+                    <span asp-validation-for="Input.StreetAddress"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.PostalCode"
+                           class="form-label"></label>
+                    <input asp-for="Input.PostalCode"
+                           class="form-control" />
+                    <span asp-validation-for="Input.PostalCode"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.AdditionalInformation"
+                           class="form-label"></label>
+                    <textarea asp-for="Input.AdditionalInformation"
+                              class="form-control"></textarea>
+                    <span asp-validation-for="Input.AdditionalInformation"
+                          class="text-danger"></span>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input asp-for="Input.SaveToProfile" class="form-check-input" />
+                    
+                    <label asp-for="Input.SaveToProfile" class="form-check-label">
+                        Save my information to my profile for future purchases
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Continue to Payment
+                </button>
+            </form>
+        </div>
+
+        <div class="col-md-5">
+            <h3>Order Summary</h3>
+
+            @foreach (var item in Model.ShoppingCart.Items)
+            {
+                <div class="d-flex justify-content-between mb-2">
+                    <span>
+                        @item.Product.Name × @item.Quantity
+                    </span>
+
+                    <span>
+                        @((item.Product.PriceCents *
+                            (decimal)item.Quantity / 100m).ToString("C"))
+                    </span>
+                </div>
+            }
+
+            <hr />
+
+            <div class="d-flex justify-content-between">
+                <strong>Total</strong>
+                <strong>@Model.TotalPrice.ToString("C")</strong>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

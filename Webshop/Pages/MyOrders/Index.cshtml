@@ -1,0 +1,129 @@
+@page
+@model Webshop.Pages.MyOrders.IndexModel
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container mt-4">
+
+    <h1 class="mb-4">My Orders</h1>
+
+    @if (Model.Orders.Count == 0)
+    {
+        <div class="alert alert-info">
+            You haven't placed any orders yet.
+        </div>
+
+        <a asp-page="/Index" class="btn btn-primary">
+            Start Shopping
+        </a>
+    }
+    else
+    {
+        <div class="row">
+
+            @foreach (var order in Model.Orders)
+            {
+                var payment = order.Payments
+                    .OrderByDescending(p => p.CreatedAt)
+                    .FirstOrDefault();
+
+                <div class="col-12 mb-3">
+
+                    <div class="card shadow-sm">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between
+                                        flex-wrap gap-2 mb-3">
+
+                                <div>
+                                    <h5 class="mb-1">
+                                        Order #@order.OrderNumber
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        @DateTime.SpecifyKind(
+    order.CreatedAt,
+    DateTimeKind.Utc
+).ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
+                                    </small>
+                                </div>
+
+                                <div>
+                                    @if (order.OrderStatus == "Paid")
+                                    {
+                                        <span class="badge bg-success">
+                                            Paid
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            @order.OrderStatus
+                                        </span>
+                                    }
+                                </div>
+
+                            </div>
+
+                            <hr />
+
+                            <div class="row">
+
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">
+                                        Products
+                                    </small>
+
+                                    <p class="mb-0">
+                                        @order.Items.Sum(i => i.Quantity)
+                                        items
+                                    </p>
+                                </div>
+
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">
+                                        Total
+                                    </small>
+
+                                    <p class="mb-0 fw-bold">
+                                        @((order.TotalPriceCents / 100m)
+                                            .ToString("C"))
+                                    </p>
+                                </div>
+
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">
+                                        Payment
+                                    </small>
+
+                                    <p class="mb-0">
+                                        @(payment?.PaymentStatus ?? "Not available")
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div class="mt-3 text-end">
+
+                                <a asp-page="/MyOrders/Details"
+                                   asp-route-id="@order.Id"
+                                   class="btn btn-outline-primary">
+                                    View Details
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

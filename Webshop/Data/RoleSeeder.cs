@@ -58,7 +58,14 @@ public static class RoleSeeder
 
             if (user is null)
             {
-                user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true };
+                user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true,
+                    IsVerified = true
+                };
+
                 var createResult = await userManager.CreateAsync(user, password);
 
                 if (!createResult.Succeeded)
@@ -69,6 +76,21 @@ public static class RoleSeeder
                 }
             }
 
+            // Ensure email is confirmed
+            if (!user.EmailConfirmed)
+            {
+                user.EmailConfirmed = true;
+
+                var updateResult = await userManager.UpdateAsync(user);
+
+                if (!updateResult.Succeeded)
+                {
+                    throw new InvalidOperationException(
+                        string.Join("; ", updateResult.Errors.Select(e => e.Description)));
+                }
+            }
+
+            // Ensure user has the correct role
             if (!await userManager.IsInRoleAsync(user, role))
             {
                 var roleAssign = await userManager.AddToRoleAsync(user, role);
