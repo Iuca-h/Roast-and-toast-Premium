@@ -6,8 +6,5 @@ dotnet user-secrets set "SeedUser:Email" "user@example.com"
 dotnet user-secrets set "SeedUser:Password" "Userpassword123!"
 
 
-dotnet user-secrets set "Smtp:Host" "smtp.gmail.com"
-dotnet user-secrets set "Smtp:Port" "587"
 dotnet user-secrets set "Smtp:User" "kkaappyyssttaaa@gmail.com"
-dotnet user-secrets set "Smtp:Password" "your-16-char-app-password"
-dotnet user-secrets set "Smtp:From" "kkaappyyssttaaa@gmail.com"
+dotnet user-secrets set "Smtp:Password" "xygs ihff zjxp eopv"

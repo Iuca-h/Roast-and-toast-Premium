@@ -4,15 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Webshop.Data;
 using Webshop.Services;
+using System.Security.Claims;
+using Webshop.Data;
 
 namespace Webshop.Pages.Admin
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly EmailSender _emailSender;
 
-        public IndexModel(UserManager<IdentityUser> userManager, EmailSender emailSender)
+        public IndexModel(UserManager<ApplicationUser> userManager, EmailSender emailSender)
         {
             _userManager = userManager;
             _emailSender = emailSender;
@@ -47,7 +49,7 @@ namespace Webshop.Pages.Admin
 
             var tempPassword = PasswordHelper.Generate();
 
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 UserName = Input.Email,
                 Email = Input.Email,
@@ -75,10 +77,10 @@ namespace Webshop.Pages.Admin
             }
 
             await _emailSender.SendEmailAsync(
-    Input.Email,
-    "WebShop SMTP Test",
-    "<h1>SMTP works!</h1><p>Your email configuration is successful.</p>"
-);
+                    Input.Email,
+                    "WebShop SMTP Test",
+                    $"<h1>Finish your webshop account!</h1><p>To login use this email and the temporary password: </p><strong>{tempPassword}</strong>"
+                );
 
 var sent = true;
 
