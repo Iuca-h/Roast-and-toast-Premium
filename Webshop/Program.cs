@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using MySql.EntityFrameworkCore.Extensions;
 using Webshop.Data;
+using Microsoft.VisualStudio.SolutionPersistence.Model;
+using Webshop.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +27,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+    // builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -42,6 +46,9 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Admin", "AdminOrDba");
     options.Conventions.AuthorizeFolder("/Dba", "AdminOrDba");
 });
+
+// for temporary password
+builder.Services.AddSingleton<Webshop.Services.EmailSender>();
 
 var app = builder.Build();
 
