@@ -4,11 +4,11 @@ using System.Text.RegularExpressions;
 
 namespace Webshop.Data;
 
-public class StrongPasswordValidator : IPasswordValidator<IdentityUser>
+public class StrongPasswordValidator : IPasswordValidator<ApplicationUser>
 {
     public Task<IdentityResult> ValidateAsync(
-        UserManager<IdentityUser> manager,
-        IdentityUser user,
+        UserManager<ApplicationUser> manager,
+        ApplicationUser user,
         string? password)
     {
         if (string.IsNullOrWhiteSpace(password))

@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,7 +58,7 @@ public static class RoleSeeder
 
             if (user is null)
             {
-                user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true, IsVerified = true };
+                user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true };
                 var createResult = await userManager.CreateAsync(user, password);
 
                 if (!createResult.Succeeded)
