@@ -1,0 +1,187 @@
+
+@page
+@model Webshop.Pages.Checkout.PaymentModel
+
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<h1>Payment</h1>
+
+@if (Model.Order != null)
+{
+    <div class="row">
+        <div class="col-md-7">
+
+            <h3>Order Information</h3>
+
+            <p>
+                <strong>Order number:</strong>
+                @Model.Order.OrderNumber
+            </p>
+
+            <p>
+                <strong>Total:</strong>
+                @((Model.Order.TotalPriceCents / 100m).ToString("C"))
+            </p>
+
+            @if (!Model.ShowThreeDSecure)
+            {
+                <h3>Choose payment method</h3>
+
+                <form method="post">
+                    <input type="hidden" asp-for="OrderId" />
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input"
+                               type="radio"
+                               asp-for="PaymentMethod"
+                               value="Card" />
+
+                        <label class="form-check-label">
+                            Credit / Debit Card
+                        </label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input"
+                               type="radio"
+                               asp-for="PaymentMethod"
+                               value="BankTransfer" />
+
+                        <label class="form-check-label">
+                            Bank Transfer
+                        </label>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input"
+                               type="radio"
+                               asp-for="PaymentMethod"
+                               value="iDEAL" />
+
+                        <label class="form-check-label">
+                            iDEAL / Wero
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Continue
+                    </button>
+                </form>
+            }
+
+            @if (Model.PaymentMethod == "Card" &&
+                 !Model.ShowThreeDSecure)
+            {
+                <hr />
+
+                <h3>Test Card Details</h3>
+
+                <div class="alert alert-warning">
+                    This is a payment simulation.
+                    Do not enter real payment card details.
+                </div>
+
+                <form method="post"
+                      asp-page-handler="ProcessCard">
+
+                    <input type="hidden"
+                           asp-for="OrderId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Card number
+                        </label>
+
+                        <input asp-for="CardNumber"
+                               class="form-control"
+                               autocomplete="off"
+                               placeholder="4242 4242 4242 4242"
+                               required />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">
+                                Expiry month
+                            </label>
+
+                            <input asp-for="ExpiryMonth"
+                                   class="form-control"
+                                   placeholder="MM"
+                                   required />
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">
+                                Expiry year
+                            </label>
+
+                            <input asp-for="ExpiryYear"
+                                   class="form-control"
+                                   placeholder="YYYY"
+                                   required />
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">
+                                Test CVV
+                            </label>
+
+                            <input asp-for="Cvv"
+                                class="form-control"
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="3"
+                                autocomplete="off"
+                                required />
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Verify Test Card
+                    </button>
+                </form>
+            }
+
+            @if (Model.ShowThreeDSecure)
+{
+    <hr />
+
+    <h3>3-D Secure Verification</h3>
+
+    <div class="alert alert-info">
+        Your test card details were accepted.
+        Enter the verification code sent by your simulated bank.
+    </div>
+
+    <form method="post" asp-page-handler="VerifyThreeDSecure">
+        <input type="hidden" asp-for="OrderId" />
+
+        <div class="mb-3">
+            <label class="form-label">Verification code</label>
+            <input asp-for="ThreeDSecureCode"
+                   class="form-control"
+                   inputmode="numeric"
+                   maxlength="6"
+                   required />
+            <span asp-validation-for="ThreeDSecureCode"
+                  class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Confirm Payment
+        </button>
+    </form>
+}
+
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
