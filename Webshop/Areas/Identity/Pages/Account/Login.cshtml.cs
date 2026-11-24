@@ -121,7 +121,7 @@ namespace Webshop.Areas.Identity.Pages.Account
 
                 // Normal login for verified users
                 var result = await _signInManager.PasswordSignInAsync(
-                    Input.Email,
+                    user,
                     Input.Password,
                     Input.RememberMe,
                     lockoutOnFailure: true);

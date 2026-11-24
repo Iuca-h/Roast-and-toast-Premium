@@ -133,6 +133,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     await RoleSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+    
 }
 
 // Configure HTTP pipeline
