@@ -148,6 +148,35 @@ else
 
 app.UseHttpsRedirection();
 
+// HTTP Security Headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+
+    context.Response.Headers["Referrer-Policy"] =
+        "strict-origin-when-cross-origin";
+
+    context.Response.Headers["Permissions-Policy"] =
+        "camera=(), microphone=(), geolocation=()";
+
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+
+    context.Response.Headers["Content-Security-Policy"] =
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: blob:; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self'; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
+        "form-action 'self'; " +
+        "frame-ancestors 'none'";
+
+    await next();
+});
+
+app.UseRouting();
 app.UseRouting();
 
 app.UseSession();

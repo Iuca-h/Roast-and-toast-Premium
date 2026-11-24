@@ -85,31 +85,31 @@ It complements Level 1 by introducing a broader protection scope.
 
 This level protects payment-related endpoints against excessive HTTP requests.
 
-Unlike the previous levels, which track incorrect verification codes, this mechanism limits how frequently requests can reach the application.
+Unlike the previous levels, which track incorrect verification codes, this mechanism limits how frequently requests can reach the payment functionality.
 
 #### How It Works
 
-ASP.NET Core Rate Limiting middleware is configured to restrict the frequency of requests to the payment page.
+ASP.NET Core Rate Limiting middleware is configured to restrict the frequency of POST requests to the payment page.
 
-The current configuration includes:
+The current configuration applies the following rules:
 
-- A maximum of 10 POST requests per minute for each combined authenticated-user and IP-address partition.
+- A maximum of 10 POST requests within a one-minute window.
+- Requests are partitioned using the authenticated user's ID and IP address.
 - GET requests are excluded from this rate limit.
 - Excessive requests are rejected with HTTP status code `429 Too Many Requests`.
-- Requests are partitioned using the authenticated user's ID and the client's IP address.
-- The policy is applied to the payment page.
+- The policy is applied to the payment page using the `EnableRateLimiting` attribute.
 
 #### Security Benefit
 
 This mechanism adds protection against automated attacks and excessive request traffic.
 
-It complements the first two levels by limiting request frequency independently of whether submitted verification codes are correct.
+It also provides an additional barrier against attempts to bypass the first two protection levels.
 
 ---
 
 ## 3. Layered Security Strategy
 
-The three levels operate at different scopes:
+The three payment security levels operate at different scopes:
 
 | Security Level | Protection Scope | Main Purpose |
 |---|---|---|
@@ -125,11 +125,11 @@ No single layer is considered sufficient on its own.
 
 ## 4. Further Security Improvements
 
-After implementing the three payment security levels, the following improvements are planned.
+After implementing the three payment security levels, the following improvements are planned or have been implemented.
 
 ### 4.1. Race Condition Protection
 
-**Status: Next Implementation Stage**
+**Status: Next Implementation Stage — Deferred**
 
 Protect payment verification counters and payment operations against simultaneous requests.
 
@@ -153,25 +153,25 @@ Further strengthen payment processing to ensure that:
 
 ### 4.3. Authentication and Account Security
 
-**Status: Existing Authentication Flow — Further Review Deferred**
+**Status: Planned — Review Deferred**
 
-The current account creation and initial password setup process works as follows:
+The current account provisioning workflow works as follows:
 
 - An administrator creates a user account using the user's email address.
-- A temporary password is sent to the user's email address.
+- A temporary password is sent to the user's email.
 - The user signs in using the temporary password.
-- The user creates a new personal password that must satisfy the configured password validation requirements.
+- The user creates a new personal password that must satisfy multiple validation rules.
 - The user can then sign in using the new password.
 
-Further security review is planned for:
+A detailed security review of this workflow is deferred because it is outside the current implementation scope.
+
+Future review may include:
 
 - Email confirmation.
 - Login brute-force protection.
 - Password recovery security.
 - Session expiration and invalidation.
 - Protection of sensitive account operations.
-
-Changes to this authentication workflow are deferred because this part of the application is outside the current implementation scope.
 
 ### 4.4. Database Security
 
@@ -199,15 +199,56 @@ Review the application against common web application vulnerabilities, including
 
 ### 4.6. HTTP Security Headers
 
-**Status: Planned**
+**Status: Implemented — Initial Configuration**
 
-Configure additional HTTP security headers, including:
+#### Purpose
 
-- Content-Security-Policy (CSP).
-- X-Content-Type-Options.
-- Referrer-Policy.
-- Permissions-Policy.
-- Appropriate clickjacking protection.
+This layer adds browser-level security protections through HTTP response headers.
+
+#### Implemented Headers
+
+The application currently configures the following headers:
+
+| Header | Configuration | Purpose |
+|---|---|---|
+| X-Content-Type-Options | `nosniff` | Prevents MIME type sniffing |
+| Referrer-Policy | `strict-origin-when-cross-origin` | Controls referrer information sent to other origins |
+| Permissions-Policy | `camera=(), microphone=(), geolocation=()` | Disables access to selected browser capabilities |
+| X-Frame-Options | `DENY` | Prevents the application from being embedded in frames |
+| Content-Security-Policy | Custom policy | Restricts the sources from which browser resources can be loaded |
+
+#### Content Security Policy
+
+The initial CSP configuration includes:
+
+- `default-src 'self'`
+- `script-src 'self' 'unsafe-inline'`
+- `style-src 'self' 'unsafe-inline'`
+- `img-src 'self' data: blob:`
+- `font-src 'self' data:`
+- `connect-src 'self'`
+- `object-src 'none'`
+- `base-uri 'self'`
+- `form-action 'self'`
+- `frame-ancestors 'none'`
+
+The policy is configured to maintain compatibility with the existing application.
+
+The use of `'unsafe-inline'` is a compatibility compromise. A stricter policy using nonces or hashes may be implemented in a future security improvement stage.
+
+#### Testing
+
+The following checks were completed:
+
+- All five security headers were confirmed in HTTP response headers.
+- Main application pages loaded successfully.
+- Existing application functionality was not disrupted by the initial policy.
+
+#### Security Benefit
+
+These headers provide additional protection against MIME sniffing, clickjacking, unwanted browser capabilities, and unauthorized resource loading.
+
+---
 
 ### 4.7. Secrets and Logging
 
@@ -229,12 +270,12 @@ Improve the handling of sensitive configuration and security events:
 | 1 | Order-based payment verification lockout | Implemented |
 | 2 | User-based payment verification lockout | Implemented |
 | 3 | HTTP Request Rate Limiting | Implemented |
-| 4 | Race condition protection | Next |
+| 4 | Race condition protection | Next — Deferred |
 | 5 | Duplicate payment and payment integrity protection | Planned |
 | 6 | Authentication and account security review | Deferred |
 | 7 | Database security review | Planned |
 | 8 | OWASP vulnerability review | Planned |
-| 9 | HTTP security headers | Planned |
+| 9 | HTTP security headers | Implemented — Initial Configuration |
 | 10 | Secrets management and security logging | Planned |
 | 11 | Final security testing and documentation review | Planned |
 
@@ -249,12 +290,12 @@ Each stage will be implemented and tested before proceeding to the next one.
 | Order-based verification lockout | Implemented |
 | User-based verification lockout | Implemented |
 | HTTP request rate limiting | Implemented |
-| Race condition protection | Next |
+| Race condition protection | Next — Deferred |
 | Duplicate payment prevention improvements | Planned |
 | Authentication security review | Deferred |
 | Database security review | Planned |
 | OWASP security review | Planned |
-| HTTP security headers | Planned |
+| HTTP security headers | Implemented — Tested |
 | Secrets management and security logging | Planned |
 | Final security testing | Planned |
 
