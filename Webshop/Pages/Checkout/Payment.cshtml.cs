@@ -1,9 +1,13 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Net;
+using System.Text;
 using Webshop.Data;
 
 namespace Webshop.Pages.Checkout;
@@ -13,13 +17,19 @@ public class PaymentModel : PageModel
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailSender _emailSender;
+    private readonly ILogger<PaymentModel> _logger;
 
     public PaymentModel(
         ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        IEmailSender emailSender,
+        ILogger<PaymentModel> logger)
     {
         _context = context;
         _userManager = userManager;
+        _emailSender = emailSender;
+        _logger = logger;
     }
 
     public Order? Order { get; set; }
@@ -32,20 +42,22 @@ public class PaymentModel : PageModel
 
     [BindProperty]
     public string CardNumber { get; set; } = "4242424242424242";
-    
+
     [BindProperty]
     public string ExpiryMonth { get; set; } = "12";
-    
+
     [BindProperty]
     public string ExpiryYear { get; set; } = "2028";
-    
+
     [BindProperty]
     public string Cvv { get; set; } = "123";
 
     public bool ShowThreeDSecure { get; set; }
-    
+
     [BindProperty]
     public string ThreeDSecureCode { get; set; } = "123456";
+
+    public string? PaymentError { get; set; }
 
     public async Task<IActionResult> OnGetAsync(
         int orderId,
@@ -69,7 +81,7 @@ public class PaymentModel : PageModel
         OrderId = Order.Id;
 
         PaymentMethod = method ?? "Card";
-        
+
         if (PaymentMethod == "Card")
         {
             CardNumber = "4242424242424242";
@@ -92,6 +104,8 @@ public class PaymentModel : PageModel
             ShowThreeDSecure = true;
         }
 
+        PaymentError = TempData["PaymentError"] as string;
+
         return Page();
     }
 
@@ -113,14 +127,7 @@ public class PaymentModel : PageModel
         if (order.OrderStatus != "Pending")
             return BadRequest();
 
-        var allowedMethods = new[]
-        {
-            "Card",
-            "BankTransfer",
-            "iDEAL"
-        };
-
-        if (!allowedMethods.Contains(PaymentMethod))
+        if (PaymentMethod != "Card")
         {
             ModelState.AddModelError(
                 nameof(PaymentMethod),
@@ -134,7 +141,7 @@ public class PaymentModel : PageModel
             new
             {
                 orderId = order.Id,
-                method = PaymentMethod
+                method = "Card"
             });
     }
 
@@ -216,97 +223,86 @@ public class PaymentModel : PageModel
                 step = "3ds"
             });
     }
-    
+
     public async Task<IActionResult> OnPostVerifyThreeDSecureAsync()
-{
-    var user = await _userManager.GetUserAsync(User);
-
-    if (user == null)
-        return Challenge();
-
-    var order = await _context.Orders.FirstOrDefaultAsync(o =>
-        o.Id == OrderId && o.UserId == user.Id);
-
-    if (order == null)
-        return NotFound();
-
-    // Prevent duplicate payment processing.
-    if (order.OrderStatus == "Paid")
     {
-        return RedirectToPage("/Checkout/Confirmation",
-            new { orderId = order.Id });
-    }
+        var user = await _userManager.GetUserAsync(User);
 
-    if (order.OrderStatus != "Pending")
-        return BadRequest();
+        if (user == null)
+            return Challenge();
 
-    var verifiedOrderId = TempData.Peek("CardVerifiedOrderId");
+        var order = await _context.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o =>
+                o.Id == OrderId &&
+                o.UserId == user.Id);
 
-    if (verifiedOrderId == null ||
-        !int.TryParse(Convert.ToString(verifiedOrderId), out var verifiedId) ||
-        verifiedId != order.Id)
-    {
-        return BadRequest();
-    }
+        if (order == null)
+            return NotFound();
 
-    if (ThreeDSecureCode != "123456")
-    {
-        ModelState.AddModelError(
-            nameof(ThreeDSecureCode),
-            "Invalid verification code."
-        );
-
-        Order = order;
-        PaymentMethod = "Card";
-        ShowThreeDSecure = true;
-
-        return Page();
-    }
-
-    await using var transaction =
-        await _context.Database.BeginTransactionAsync();
-
-    // Check again before creating the payment.
-    bool paymentAlreadyExists = await _context.Payments.AnyAsync(p =>
-        p.OrderId == order.Id &&
-        p.PaymentStatus == "Succeeded");
-
-    if (paymentAlreadyExists)
-    {
-        await transaction.RollbackAsync();
-
-        return RedirectToPage("/Checkout/Confirmation",
-            new { orderId = order.Id });
-    }
-
-    // Save shipping details to the user's profile only if requested.
-    bool saveToProfile =
-        TempData["SaveToProfile"] is bool save && save;
-
-    if (saveToProfile)
-    {
-        user.FirstName = order.FirstName;
-        user.LastName = order.LastName;
-        user.PhoneNumber = order.PhoneNumber;
-        user.Country = order.Country;
-        user.City = order.City;
-        user.StreetAddress = order.StreetAddress;
-        user.PostalCode = order.PostalCode;
-        user.AdditionalInformation = order.AdditionalInformation;
-
-        var updateResult = await _userManager.UpdateAsync(user);
-
-        if (!updateResult.Succeeded)
+        // Prevent duplicate payment processing.
+        if (order.OrderStatus == "Paid")
         {
-            await transaction.RollbackAsync();
+            return RedirectToPage("/Checkout/Confirmation",
+                new { orderId = order.Id });
+        }
 
-            foreach (var error in updateResult.Errors)
+        if (order.OrderStatus != "Pending")
+            return BadRequest();
+
+        var verifiedOrderId = TempData.Peek("CardVerifiedOrderId");
+
+        if (verifiedOrderId == null ||
+            !int.TryParse(
+                Convert.ToString(verifiedOrderId),
+                out var verifiedId) ||
+            verifiedId != order.Id)
+        {
+            return BadRequest();
+        }
+
+        // Simulate a bank-declined payment.
+        if (ThreeDSecureCode == "000000")
+        {
+            await using var failedTransaction =
+                await _context.Database.BeginTransactionAsync();
+
+            var failedAt = DateTime.UtcNow;
+
+            var failedPayment = new Payment
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    error.Description
-                );
-            }
+                OrderId = order.Id,
+                TransactionId = $"TXN-{Guid.NewGuid():N}",
+                PaymentMethod = "Card",
+                PaymentStatus = "Failed",
+                AmountCents = order.TotalPriceCents,
+                Currency = order.Currency,
+                CardBrand = "Visa",
+                CardLast4 = "4242",
+                CreatedAt = failedAt,
+                ProcessedAt = failedAt
+            };
+
+            _context.Payments.Add(failedPayment);
+
+            await _context.SaveChangesAsync();
+            await failedTransaction.CommitAsync();
+
+            TempData.Remove("CardVerifiedOrderId");
+
+            TempData["PaymentError"] =
+                "Your bank declined the payment. Please try again.";
+
+            return RedirectToPage("/Checkout/Payment",
+                new { orderId = order.Id, method = "Card" });
+        }
+
+        // Any other incorrect code is treated as invalid input.
+        if (ThreeDSecureCode != "123456")
+        {
+            ModelState.AddModelError(
+                nameof(ThreeDSecureCode),
+                "Invalid verification code.");
 
             Order = order;
             PaymentMethod = "Card";
@@ -314,46 +310,190 @@ public class PaymentModel : PageModel
 
             return Page();
         }
+
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
+        // Check again before creating the payment.
+        bool paymentAlreadyExists = await _context.Payments.AnyAsync(p =>
+            p.OrderId == order.Id &&
+            p.PaymentStatus == "Succeeded");
+
+        if (paymentAlreadyExists)
+        {
+            await transaction.RollbackAsync();
+
+            return RedirectToPage("/Checkout/Confirmation",
+                new { orderId = order.Id });
+        }
+
+        // Save shipping details to the user's profile only if requested.
+        bool saveToProfile =
+            TempData["SaveToProfile"] is bool save && save;
+
+        if (saveToProfile)
+        {
+            user.FirstName = order.FirstName;
+            user.LastName = order.LastName;
+            user.PhoneNumber = order.PhoneNumber;
+            user.Country = order.Country;
+            user.City = order.City;
+            user.StreetAddress = order.StreetAddress;
+            user.PostalCode = order.PostalCode;
+            user.AdditionalInformation = order.AdditionalInformation;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                await transaction.RollbackAsync();
+
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        error.Description);
+                }
+
+                Order = order;
+                PaymentMethod = "Card";
+                ShowThreeDSecure = true;
+
+                return Page();
+            }
+        }
+
+        var now = DateTime.UtcNow;
+
+        var payment = new Payment
+        {
+            OrderId = order.Id,
+            TransactionId = $"TXN-{Guid.NewGuid():N}",
+            PaymentMethod = "Card",
+            PaymentStatus = "Succeeded",
+            AmountCents = order.TotalPriceCents,
+            Currency = order.Currency,
+            CardBrand = "Visa",
+            CardLast4 = "4242",
+            CreatedAt = now,
+            ProcessedAt = now
+        };
+
+        _context.Payments.Add(payment);
+
+        order.OrderStatus = "Paid";
+        order.UpdatedAt = now;
+
+        // Clear the user's shopping cart.
+        var cart = await _context.Carts
+            .Include(c => c.Items)
+            .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+        if (cart != null)
+        {
+            _context.CartItems.RemoveRange(cart.Items);
+        }
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        // Send confirmation email only after successful payment.
+        try
+        {
+            var emailHtml = BuildOrderConfirmationEmail(order, payment);
+
+            await _emailSender.SendEmailAsync(
+                order.Email,
+                $"Order confirmation - {order.OrderNumber}",
+                emailHtml);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Payment succeeded, but confirmation email failed for order {OrderId}.",
+                order.Id);
+
+            TempData["EmailWarning"] =
+                "Your payment was successful, but we couldn't send the confirmation email. You can view your order in My Orders.";
+        }
+
+        TempData.Remove("CardVerifiedOrderId");
+        TempData.Remove("SaveToProfile");
+
+        return RedirectToPage("/Checkout/Confirmation",
+            new { orderId = order.Id });
     }
 
-    var now = DateTime.UtcNow;
-
-    var payment = new Payment
+    private string BuildOrderConfirmationEmail(Order order, Payment payment)
     {
-        OrderId = order.Id,
-        TransactionId = $"TXN-{Guid.NewGuid():N}",
-        PaymentMethod = "Card",
-        PaymentStatus = "Succeeded",
-        AmountCents = order.TotalPriceCents,
-        Currency = order.Currency,
-        CardBrand = "Visa",
-        CardLast4 = "4242",
-        CreatedAt = now,
-        ProcessedAt = now
-    };
+        var culture = CultureInfo.GetCultureInfo("en-IE");
 
-    _context.Payments.Add(payment);
+        string FormatPrice(long cents)
+        {
+            return (cents / 100m).ToString("C", culture);
+        }
 
-    order.OrderStatus = "Paid";
-    order.UpdatedAt = now;
+        string Safe(string? value)
+        {
+            return WebUtility.HtmlEncode(value ?? string.Empty);
+        }
 
-    // Clear the user's shopping cart.
-    var cart = await _context.Carts
-        .Include(c => c.Items)
-        .FirstOrDefaultAsync(c => c.UserId == user.Id);
+        var html = new StringBuilder();
 
-    if (cart != null)
-    {
-        _context.CartItems.RemoveRange(cart.Items);
+        html.Append($"""
+            <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <h2>Thank you for your order, {Safe(order.FirstName)}!</h2>
+
+                <p>Your payment was successful and your order has been confirmed.</p>
+
+                <h3>Order details</h3>
+                <p><strong>Order number:</strong> {Safe(order.OrderNumber)}</p>
+                <p><strong>Order date:</strong> {order.CreatedAt:dd MMMM yyyy}</p>
+
+                <h3>Items</h3>
+                <table style="border-collapse: collapse; width: 100%;">
+                    <tr>
+                        <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Product</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">Quantity</th>
+                        <th style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">Subtotal</th>
+                    </tr>
+            """);
+
+        foreach (var item in order.Items)
+        {
+            html.Append($"""
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                            {Safe(item.ProductName)} ({Safe(item.ProductModel)})
+                        </td>
+                        <td style="text-align: center; padding: 8px; border-bottom: 1px solid #ddd;">
+                            {item.Quantity}
+                        </td>
+                        <td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">
+                            {FormatPrice(item.SubtotalCents)}
+                        </td>
+                    </tr>
+                """);
+        }
+
+        html.Append($"""
+                </table>
+
+                <h3>Total: {FormatPrice(order.TotalPriceCents)}</h3>
+
+                <h3>Payment information</h3>
+                <p><strong>Status:</strong> Successful</p>
+                <p><strong>Method:</strong> Card</p>
+                <p><strong>Card:</strong> {Safe(payment.CardBrand)} ending in {Safe(payment.CardLast4)}</p>
+                <p><strong>Transaction ID:</strong> {Safe(payment.TransactionId)}</p>
+
+                <p>Thank you for shopping with us!</p>
+            </body>
+            </html>
+            """);
+
+        return html.ToString();
     }
-
-    await _context.SaveChangesAsync();
-    await transaction.CommitAsync();
-
-    TempData.Remove("CardVerifiedOrderId");
-    TempData.Remove("SaveToProfile");
-
-    return RedirectToPage("/Checkout/Confirmation",
-        new { orderId = order.Id });
-}
 }

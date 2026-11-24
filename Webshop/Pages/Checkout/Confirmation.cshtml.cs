@@ -11,7 +11,10 @@ namespace Webshop.Pages.Checkout;
 public class ConfirmationModel : PageModel
 {
     private readonly ApplicationDbContext _context;
+    
     private readonly UserManager<ApplicationUser> _userManager;
+    
+    public string? EmailWarning { get; set; }
 
     public ConfirmationModel(
         ApplicationDbContext context,
@@ -54,6 +57,8 @@ public class ConfirmationModel : PageModel
 
         if (Payment == null)
             return NotFound();
+            
+        EmailWarning = TempData["EmailWarning"] as string;
 
         return Page();
     }
