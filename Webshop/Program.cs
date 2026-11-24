@@ -16,6 +16,13 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleSeeder.AdminRole, policy => policy.RequireRole(RoleSeeder.AdminRole));
+    options.AddPolicy(RoleSeeder.DbaRole, policy => policy.RequireRole(RoleSeeder.DbaRole));
+});
+
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/Admin", RoleSeeder.AdminRole);
