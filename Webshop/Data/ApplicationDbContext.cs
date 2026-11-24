@@ -20,6 +20,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OrderItem> OrderItems { get; set; }
 
     public DbSet<Payment> Payments { get; set; }
+    
+    public DbSet<PaymentVerificationAttempt> PaymentVerificationAttempts { get; set; }
+    
+    public DbSet<UserPaymentVerificationAttempt> UserPaymentVerificationAttempts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -162,5 +166,44 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        
+        // PAYMENT VERIFICATION ATTEMPTS
+        builder.Entity<PaymentVerificationAttempt>(entity =>
+        {
+            entity.ToTable("PaymentVerificationAttempts");
+            
+            entity.HasKey(a => a.Id);
+            
+            entity.HasIndex(a => a.OrderId)
+                .IsUnique();
+                
+            entity.Property(a => a.FailedAttempts)
+                .HasColumnType("int");
+                
+            entity.HasOne(a => a.Order)
+                .WithMany()
+                .HasForeignKey(a => a.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // USER PAYMENT VERIFICATION ATTEMPTS
+        builder.Entity<UserPaymentVerificationAttempt>(entity =>
+        {
+            entity.ToTable("UserPaymentVerificationAttempts");
+            
+            entity.HasKey(a => a.Id);
+            
+            entity.HasIndex(a => a.UserId).IsUnique();
+            
+            entity.Property(a => a.FailedAttempts).HasColumnType("int");
+            
+            entity.Property(a => a.UserId).HasMaxLength(255);
+            
+            entity.HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
     }
 }
