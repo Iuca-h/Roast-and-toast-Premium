@@ -15,27 +15,53 @@ public static class RoleSeeder
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
 
-        // Create the three roles if they don't exist
+        // Create the roles if they don't exist
         foreach (var role in new[] { UserRole, AdminRole, DbaRole })
         {
             if (!await roleManager.RoleExistsAsync(role))
-                await roleManager.CreateAsync(new IdentityRole(role));
+            {
+                var roleResult = await roleManager.CreateAsync(new IdentityRole(role));
+                if (!roleResult.Succeeded)
+                    throw new InvalidOperationException(
+                        string.Join("; ", roleResult.Errors.Select(e => e.Description)));
+            }
         }
 
-        // Create a first admin from user secrets, if configured
-        var email = config["SeedAdmin:Email"];
-        var password = config["SeedAdmin:Password"];
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            return;
-
-        var admin = await userManager.FindByEmailAsync(email);
-        if (admin is null)
+        // Each user-secrets section maps to one role
+        var seeds = new[]
         {
-            admin = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
-            await userManager.CreateAsync(admin, password);
-        }
+            (Section: "SeedAdmin", Role: AdminRole),
+            (Section: "SeedDba",   Role: DbaRole),
+            (Section: "SeedUser",  Role: UserRole),
+        };
 
-        if (!await userManager.IsInRoleAsync(admin, AdminRole))
-            await userManager.AddToRoleAsync(admin, AdminRole);
+        foreach (var (section, role) in seeds)
+        {
+            var email = config[$"{section}:Email"];
+            var password = config[$"{section}:Password"];
+
+            // Skip this account if it isn't configured
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                continue;
+
+            var user = await userManager.FindByEmailAsync(email);
+            if (user is null)
+            {
+                user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+                var createResult = await userManager.CreateAsync(user, password);
+                if (!createResult.Succeeded)
+                    throw new InvalidOperationException(
+                        $"Could not create {section} user: " +
+                        string.Join("; ", createResult.Errors.Select(e => e.Description)));
+            }
+
+            if (!await userManager.IsInRoleAsync(user, role))
+            {
+                var roleAssign = await userManager.AddToRoleAsync(user, role);
+                if (!roleAssign.Succeeded)
+                    throw new InvalidOperationException(
+                        string.Join("; ", roleAssign.Errors.Select(e => e.Description)));
+            }
+        }
     }
 }
