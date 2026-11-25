@@ -1,71 +1,120 @@
 ﻿@page
+@using Microsoft.CodeAnalysis.Scripting
 @model Webshop.Pages.Admin.IndexModel
 @{
     ViewData["Title"] = "User management";
 }
 
-<h1>Users</h1>
+<div class="container-fluid shadow-lg p-3">
+    <div class="container-md">
+        <h1>Users</h1>
 
-@if (TempData["Message"] is string message)
-{
-    <div class="alert alert-success">@message</div>
-}
+        @if (TempData["Message"] is string message)
+        {
+            <div class="alert alert-success">@message</div>
+        }
 
-<div class="table-scroll" style="--table-max-height: 20rem;">
-    <table class="table table-hover align-middle mb-0">
-        <thead>
-            <tr>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Verified</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model.Users)
-            {
-                <tr>
-                    <td>@user.Email</td>
-                    <td>@string.Join(", ", user.Roles)</td>
-                    <td>
-                        @if (user.IsVerified)
-                        {
-                            <span class="badge text-bg-success">Verified</span>
-                        }
-                        else
-                        {
-                            <span class="badge text-bg-danger">Unverified</span>
-                        }
-                    </td>
-                    <td>
-                        <form class="d-flex justify-content-end" method="post" asp-page-handler="Delete"
-                              onsubmit="return confirm('Delete @user.Email?');">
-                            <input type="hidden" name="id" value="@user.Id" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete user">
-                                <i class="bi bi-trash"></i> Verwijder
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        <div class="table-scroll" style="--table-max-height: 20rem;">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Verified</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>@user.Email</td>
+                            <td>@string.Join(", ", user.Roles)</td>
+                            <td>
+                                @if (user.IsVerified)
+                                {
+                                    <span class="badge text-bg-success">Verified</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-danger">Unverified</span>
+                                }
+                            </td>
+                            <td>
+                                <form class="d-flex justify-content-end" method="post" asp-page-handler="Delete"
+                                    onsubmit="return confirm('Delete @user.Email?');">
+                                    <input type="hidden" name="id" value="@user.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete user">
+                                        <i class="bi bi-trash"></i> Verwijder
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <br/>
+
+        <h2>Create user</h2>
+
+        <form method="post" asp-page-handler="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            
+            <div class="mb-2 form-floating d-flex">
+                <input asp-for="Input.Email" class="form-control col rounded-end-0" id="emailInput" placeholder="name@example.com" />
+                <label asp-for="Input.Email" for="emailInput" class="form-label "></label>
+                <button type="submit" class="btn btn-primary col col-auto rounded-start-0">Create user</button> 
+            </div>
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+
+            
+        </form>
+    </div>
 </div>
 
-<br/>
+<div class="container-fluid shadow-lg p-3">
+    <div class="container-md">
+        <h2>Product stock</h2>
 
-<h2>Create user</h2>
-
-<form method="post" asp-page-handler="Create">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    
-    <div class="mb-2 form-floating d-flex">
-        <input asp-for="Input.Email" class="form-control col rounded-end-0" id="emailInput" placeholder="name@example.com" />
-        <label asp-for="Input.Email" for="emailInput" class="form-label "></label>
-        <button type="submit" class="btn btn-primary col col-auto rounded-start-0">Create user</button> 
+        <div class="table-scroll" style="--table-max-height: 30rem;">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="width: 10rem;">Stock</th>
+                        <th style="width: 12rem;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model.Products)
+                    {
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>
+                                <form id="stock-@product.Id" method="post" asp-page-handler="SetStock">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <input type="number" min="0" name="stockAmount"
+                                           value="@product.StockAmount"
+                                           class="form-control form-control-sm" />
+                                </form>
+                            </td>
+                            <td class="text-end">
+                                <button type="submit" form="stock-@product.Id"
+                                        class="btn btn-sm btn-outline-primary">
+                                    Save
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-    <span asp-validation-for="Input.Email" class="text-danger"></span>
+</div>
 
-    
-</form>
+<script defer>
+    document.querySelector('body>div.container').classList.remove('container')
+</script>
