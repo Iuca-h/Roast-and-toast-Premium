@@ -54,12 +54,22 @@
 
             <form method="post"
                   asp-page-handler="AddToCart"
-                  asp-route-id="@Model.Product.Id">
+                  asp-route-id="@Model.Product.Id"
+                  class="d-flex align-items-center justify-content-between">
 
                 <button type="submit" class="btn btn-success btn-lg">
                     <i class="bi bi-cart-plus"></i>
                     Add to Cart
                 </button>
+                @if (@Model.Product.Stock.StockAmount > 0)
+                    {
+                        <span class="text-secondary fs-4">In Stock: @Model.Product.Stock.StockAmount</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger fs-4">Out of Stock</span>
+                    }
+
 
             </form>
 

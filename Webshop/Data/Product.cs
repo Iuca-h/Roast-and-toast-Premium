@@ -25,4 +25,6 @@ public class Product
     public string? ImageContentType { get; set; }
 
     public string? ImageFileName { get; set; }
+
+    public Stock? Stock { get; set; }
 }

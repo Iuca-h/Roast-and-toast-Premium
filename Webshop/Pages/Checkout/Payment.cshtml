@@ -13,6 +13,20 @@
         @Model.PaymentError
     </div>
 }
+@if (ViewContext.ModelState.ErrorCount > 0)
+{
+    <div class="alert alert-danger" role="alert">
+        <ul class="mb-0">
+            @foreach (var entry in ViewContext.ModelState.Values)
+            {
+                foreach (var error in entry.Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
 
 @if (Model.Order != null)
 {

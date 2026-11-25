@@ -30,6 +30,7 @@ public class DetailsModel : PageModel
     public async Task<IActionResult> OnGetAsync(int id)
     {
         Product = await _context.Products
+            .Include(p => p.Stock)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
 

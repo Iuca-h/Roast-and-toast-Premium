@@ -18,6 +18,7 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         Products = await _context.Products
+            .Include(p => p.Stock)
             .AsNoTracking()
             .ToListAsync();
     }

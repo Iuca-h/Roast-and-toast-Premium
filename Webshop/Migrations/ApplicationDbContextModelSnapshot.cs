@@ -504,13 +504,15 @@ namespace Webshop.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("ImageContentType")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<byte[]>("ImageData")
                         .HasColumnType("longblob");
 
                     b.Property<string>("ImageFileName")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Material")
                         .IsRequired()
@@ -518,11 +520,13 @@ namespace Webshop.Migrations
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<decimal>("PowerKw")
                         .HasPrecision(6, 2)
@@ -534,6 +538,26 @@ namespace Webshop.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("Webshop.Data.Stock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StockAmount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
+
+                    b.ToTable("Stocks", (string)null);
                 });
 
             modelBuilder.Entity("Webshop.Data.UserPaymentVerificationAttempt", b =>
@@ -702,6 +726,17 @@ namespace Webshop.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Webshop.Data.Stock", b =>
+                {
+                    b.HasOne("Webshop.Data.Product", "Product")
+                        .WithOne("Stock")
+                        .HasForeignKey("Webshop.Data.Stock", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Webshop.Data.UserPaymentVerificationAttempt", b =>
                 {
                     b.HasOne("Webshop.Data.ApplicationUser", "User")
@@ -723,6 +758,11 @@ namespace Webshop.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("Webshop.Data.Product", b =>
+                {
+                    b.Navigation("Stock");
                 });
 #pragma warning restore 612, 618
         }
