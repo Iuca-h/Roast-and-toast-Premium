@@ -1,0 +1,148 @@
+/* =========================
+   PRODUCT DETAILS PAGE
+========================= */
+
+.details-back-link {
+    display: inline-block;
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.details-back-link:hover {
+    color: var(--color-accent);
+}
+
+/* IMAGE */
+
+.details-image-wrapper {
+    min-height: 400px;
+    height: 100%;
+    padding: 30px;
+    background-color: #F0F2F5;
+    border: 1px solid #E5E8ED;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.details-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+}
+
+.details-image-empty {
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+}
+
+/* INFORMATION */
+
+.details-information {
+    padding: 10px 0;
+}
+
+.details-title {
+    color: var(--color-primary);
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1.1;
+}
+
+.details-model {
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+}
+
+.details-price {
+    color: var(--color-accent);
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* CART */
+
+.details-cart-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.details-cart-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    padding: 13px 18px;
+    border-radius: 0;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-primary);
+    font-weight: 500;
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.details-cart-button:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.details-stock {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.details-stock.in-stock {
+    color: #52765B;
+}
+
+.details-stock.out-of-stock {
+    color: #8996A5;
+}
+
+/* SPECIFICATIONS AND DESCRIPTION */
+
+.details-section {
+    border-top: 1px solid #E5E8ED;
+    padding-top: 20px;
+}
+
+.details-section-title {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.details-table {
+    margin-bottom: 0;
+}
+
+.details-table th,
+.details-table td {
+    padding: 12px 0;
+    border-color: #E5E8ED;
+    font-size: 0.9rem;
+}
+
+.details-table th {
+    color: var(--color-secondary);
+    font-weight: 400;
+}
+
+.details-table td {
+    color: var(--color-primary);
+    text-align: right;
+}
+
+.details-description {
+    color: #657386;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    white-space: pre-line;
+}

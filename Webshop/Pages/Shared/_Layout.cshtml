@@ -33,19 +33,19 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-page="/Cart/Index">
-                                shopping cart
+                                cart
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-page="/MyOrders/Index">
-                                my orders
+                                orders
                             </a>
                         </li>
                     }
                     @if (User.IsInRole("DBA") || User.IsInRole("Admin"))
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Admin/Index">admin dashboard</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Admin/Index">dashboard</a>
                         </li>
                     }
                     </ul>
