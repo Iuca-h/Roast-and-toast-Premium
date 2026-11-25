@@ -1,0 +1,113 @@
+@page
+@model Webshop.Pages.Checkout.ConfirmationModel
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+@if (Model.Order != null && Model.Payment != null)
+{
+    <div class="container mt-5">
+
+        <div class="text-center mb-4">
+            <h1 class="text-success">Payment Successful!</h1>
+
+            <p class="lead">
+                Thank you for your order.
+                Your payment has been successfully processed.
+            </p>
+            @if (!string.IsNullOrEmpty(Model.EmailWarning))
+{
+    <div class="alert alert-warning">
+        @Model.EmailWarning
+    </div>
+}
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+
+                <h4>Order Information</h4>
+
+                <p>
+                    <strong>Order number:</strong>
+                    @Model.Order.OrderNumber
+                </p>
+
+                <p>
+                    <strong>Order status:</strong>
+                    @Model.Order.OrderStatus
+                </p>
+
+                <p>
+                    <strong>Order date:</strong>
+                    @DateTime.SpecifyKind(
+    Model.Order.CreatedAt,
+    DateTimeKind.Utc
+).ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
+                </p>
+
+                <hr />
+
+                <h4>Payment Information</h4>
+
+                <p>
+                    <strong>Payment method:</strong>
+                    @Model.Payment.PaymentMethod
+                </p>
+
+                <p>
+                    <strong>Card:</strong>
+                    @Model.Payment.CardBrand ending in
+                    @Model.Payment.CardLast4
+                </p>
+
+                <p>
+                    <strong>Transaction ID:</strong>
+                    @Model.Payment.TransactionId
+                </p>
+
+                <p>
+                    <strong>Payment status:</strong>
+                    @Model.Payment.PaymentStatus
+                </p>
+
+                <hr />
+
+                <h4>Ordered Products</h4>
+
+                @foreach (var item in Model.Order.Items)
+                {
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>
+                            @item.ProductName
+                            (x @item.Quantity)
+                        </span>
+
+                        <span>
+                            @((item.SubtotalCents / 100m).ToString("C"))
+                        </span>
+                    </div>
+                }
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+                    <h5>Total</h5>
+
+                    <h5>
+                        @((Model.Order.TotalPriceCents / 100m).ToString("C"))
+                    </h5>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a asp-page="/Index" class="btn btn-primary">
+                Continue Shopping
+            </a>
+        </div>
+
+    </div>
+}
