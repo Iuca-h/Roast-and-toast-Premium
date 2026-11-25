@@ -2,10 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Webshop.Data;
 using Webshop.Services;
-using System.Security.Claims;
-using Webshop.Data;
 
 namespace Webshop.Pages.Admin
 {
@@ -13,19 +12,26 @@ namespace Webshop.Pages.Admin
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly EmailSender _emailSender;
+        private readonly ApplicationDbContext _context;
 
-        public IndexModel(UserManager<ApplicationUser> userManager, EmailSender emailSender)
+        public IndexModel(
+            UserManager<ApplicationUser> userManager,
+            EmailSender emailSender,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _context = context;
         }
 
         public List<UserRow> Users { get; set; } = new();
+        public List<ProductStockRow> Products { get; set; } = new();
 
         [BindProperty]
         public NewUserInput Input { get; set; } = new();
 
         public record UserRow(string Id, bool IsVerified, string Email, IList<string> Roles);
+        public record ProductStockRow(int Id, string Name, int StockAmount);
 
         public class NewUserInput
         {
@@ -36,6 +42,7 @@ namespace Webshop.Pages.Admin
         public async Task OnGetAsync()
         {
             await LoadUsersAsync();
+            await LoadProductsAsync();
         }
 
         // Creates a User-role account with a generated password and emails it.
@@ -44,6 +51,7 @@ namespace Webshop.Pages.Admin
             if (!ModelState.IsValid)
             {
                 await LoadUsersAsync();
+                await LoadProductsAsync();
                 return Page();
             }
 
@@ -63,6 +71,7 @@ namespace Webshop.Pages.Admin
                     ModelState.AddModelError(string.Empty, error.Description);
 
                 await LoadUsersAsync();
+                await LoadProductsAsync();
                 return Page();
             }
 
@@ -73,6 +82,7 @@ namespace Webshop.Pages.Admin
                     ModelState.AddModelError(string.Empty, error.Description);
 
                 await LoadUsersAsync();
+                await LoadProductsAsync();
                 return Page();
             }
 
@@ -82,7 +92,7 @@ namespace Webshop.Pages.Admin
                     $"<h1>Finish your webshop account!</h1><p>To login use this email and the temporary password: </p><strong>{tempPassword}</strong>"
                 );
 
-var sent = true;
+            var sent = true;
 
             TempData["Message"] = sent
                 ? $"Created {Input.Email} and emailed a temporary password."
@@ -115,6 +125,38 @@ var sent = true;
             return RedirectToPage();
         }
 
+        // Sets the stock for one product. Creates the stock row if it doesn't exist yet.
+        public async Task<IActionResult> OnPostSetStockAsync(int productId, int stockAmount)
+        {
+            if (stockAmount < 0)
+            {
+                TempData["Message"] = "Stock can't be negative.";
+                return RedirectToPage();
+            }
+
+            var stock = await _context.Stocks
+                .FirstOrDefaultAsync(s => s.ProductId == productId);
+
+            if (stock is null)
+            {
+                var productExists = await _context.Products.AnyAsync(p => p.Id == productId);
+                if (!productExists)
+                {
+                    TempData["Message"] = "Product not found.";
+                    return RedirectToPage();
+                }
+
+                stock = new Stock { ProductId = productId };
+                _context.Stocks.Add(stock);
+            }
+
+            stock.StockAmount = stockAmount;
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Stock updated.";
+            return RedirectToPage();
+        }
+
         private async Task LoadUsersAsync()
         {
             var users = _userManager.Users.OrderBy(u => u.Email).ToList();
@@ -127,6 +169,16 @@ var sent = true;
             }
 
             Users = rows;
+        }
+
+        private async Task LoadProductsAsync()
+        {
+            Products = await _context.Products
+                .AsNoTracking()
+                .Include(p => p.Stock)
+                .OrderBy(p => p.Name)
+                .Select(p => new ProductStockRow(p.Id, p.Name, p.Stock != null ? p.Stock.StockAmount : 0))
+                .ToListAsync();
         }
     }
 }

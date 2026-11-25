@@ -43,20 +43,29 @@ public class CartService
                 i.CartId == cart.Id &&
                 i.ProductId == productId);
 
+        var stock = await GetAvailableStockAsync(productId);
+        var currentQuantity = cartItem?.Quantity ?? 0;
+
+        if (currentQuantity + 1 > stock)
+        {
+            throw new InvalidOperationException(
+                stock == 0
+                    ? "This product is out of stock."
+                    : $"Only {stock} in stock. You already have {currentQuantity} in your cart.");
+        }
+
         if (cartItem != null)
         {
             cartItem.Quantity++;
         }
         else
         {
-            var newCartItem = new CartItem
+            _context.CartItems.Add(new CartItem
             {
                 CartId = cart.Id,
                 ProductId = productId,
                 Quantity = 1
-            };
-
-            _context.CartItems.Add(newCartItem);
+            });
         }
 
         await _context.SaveChangesAsync();
@@ -86,6 +95,14 @@ public class CartService
                 "Cart item not found.");
         }
 
+        var stock = await GetAvailableStockAsync(cartItem.ProductId);
+
+        if (quantity > stock)
+        {
+            throw new InvalidOperationException(
+                $"Only {stock} in stock.");
+        }
+
         cartItem.Quantity = quantity;
 
         await _context.SaveChangesAsync();
@@ -111,5 +128,14 @@ public class CartService
         _context.CartItems.Remove(cartItem);
 
         await _context.SaveChangesAsync();
+    }
+
+    private async Task<int> GetAvailableStockAsync(int productId)
+    {
+        // FirstOrDefaultAsync returns 0 when the product has no stock row
+        return await _context.Stocks
+            .Where(s => s.ProductId == productId)
+            .Select(s => s.StockAmount)
+            .FirstOrDefaultAsync();
     }
 }

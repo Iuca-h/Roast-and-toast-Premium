@@ -129,11 +129,13 @@ builder.Services.AddRazorPages(options =>
 
 var app = builder.Build();
 
-// Seed roles and users
+// Seed roles, users and Products
 using (var scope = app.Services.CreateScope())
 {
     await RoleSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
     
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await ProductSeeder.SeedAsync(db);
 }
 
 // Configure HTTP pipeline

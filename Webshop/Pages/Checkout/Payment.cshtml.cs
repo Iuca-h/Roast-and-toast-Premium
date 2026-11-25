@@ -478,6 +478,38 @@ public class PaymentModel : PageModel
                 new { orderId = order.Id });
         }
 
+        // Reduce stock for every item in the order. Runs inside the transaction,
+        // so if any item is short, nothing is charged and nothing is saved.
+        foreach (var item in order.Items)
+        {
+            if (item.ProductId is not int productId)
+                continue;
+
+            var qty = item.Quantity;
+
+            // The WHERE clause only matches when there is enough stock, so two
+            // customers can't both buy the last item.
+            var updated = await _context.Stocks
+                .Where(s => s.ProductId == productId && s.StockAmount >= qty)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.StockAmount, x => x.StockAmount - qty));
+
+            if (updated == 0)
+            {
+                await transaction.RollbackAsync();
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    $"Sorry, {item.ProductName} is no longer available in the requested quantity. Please update your cart.");
+
+                Console.WriteLine($"Sorry, {item.ProductName} is no longer available in the requested quantity. Please update your cart.");
+                Order = order;
+                PaymentMethod = "Card";
+                ShowThreeDSecure = true;
+
+                return Page();
+            }
+        }
+
         // Save shipping details to the user's profile only if requested.
         bool saveToProfile =
             TempData["SaveToProfile"] is bool save && save;

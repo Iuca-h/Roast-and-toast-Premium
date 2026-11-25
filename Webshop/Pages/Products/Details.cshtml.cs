@@ -30,6 +30,7 @@ public class DetailsModel : PageModel
     public async Task<IActionResult> OnGetAsync(int id)
     {
         Product = await _context.Products
+            .Include(p => p.Stock)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -51,10 +52,15 @@ public class DetailsModel : PageModel
             return Challenge();
         }
 
-        await _cartService.AddToCartAsync(userId, id);
-
-        TempData["CartMessage"] =
-            "Product successfully added to cart!";
+        try
+        {
+            await _cartService.AddToCartAsync(userId, id);
+            TempData["CartMessage"] = "Product successfully added to cart!";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["CartError"] = ex.Message;
+        }
 
         return RedirectToPage("/Products/Details", new { id });
     }
