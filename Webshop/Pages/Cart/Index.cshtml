@@ -1,4 +1,3 @@
-
 @page
 @model Webshop.Pages.Cart.IndexModel
 
@@ -6,106 +5,129 @@
     ViewData["Title"] = "Shopping Cart";
 }
 
-<div class="container mt-4">
+<div class="container">
+    <div class="mb-5">
+        <h1 class="products-title mt-3">
+            Shopping <span>Cart.</span>
+        </h1>
 
-    <h1 class="mb-4">Shopping Cart</h1>
+        <p class="login-description">
+            Review your selected equipment before checkout.
+        </p>
+    </div>
 
     @if (Model.ShoppingCart == null ||
          !Model.ShoppingCart.Items.Any())
     {
-        <div class="alert alert-info">
-            Your shopping cart is empty.
-        </div>
+        <div class="cart-empty p-4 p-md-5 text-center">
 
-        <a asp-page="/Products/Index"
-           class="btn btn-primary">
-            Continue Shopping
-        </a>
+            <i class="bi bi-cart3 cart-empty-icon"></i>
+
+            <h3 class="cart-section-title mt-3">
+                Your cart is empty.
+            </h3>
+
+            <p class="login-description mb-4">
+                You haven't added any equipment to your cart yet.
+            </p>
+
+            <a asp-page="/Products/Index"
+               class="btn btn-primary cart-primary-button">
+                Explore equipment
+                <span>↗</span>
+            </a>
+
+        </div>
     }
     else
     {
-        <div class="row">
+        <div class="row g-4">
 
-            <div class="col-lg-8">
+            <!-- CART ITEMS -->
+            <div class="col-12 col-lg-8">
 
                 @foreach (var item in Model.ShoppingCart.Items)
                 {
                     var maxQty = item.Product.Stock?.StockAmount ?? 0;
 
-                    <div class="card mb-3 shadow-sm">
+                    <div class="cart-item-card mb-3">
 
-                        <div class="card-body">
+                        <div class="row align-items-center g-3">
 
-                            <div class="row align-items-center">
+                            <div class="col-12 col-md-4">
 
-                                <div class="col-md-4">
+                                <span class="cart-item-model">
+                                    @item.Product.Model
+                                </span>
 
-                                    <h5>@item.Product.Name</h5>
+                                <h5 class="cart-item-name mt-2">
+                                    @item.Product.Name
+                                </h5>
 
-                                    <p class="text-muted mb-0">
-                                        Model: @item.Product.Model
-                                    </p>
+                                <p class="cart-item-price mb-0">
+                                    € @((item.Product.PriceCents / 100m).ToString("N2"))
+                                </p>
 
-                                    <p class="text-primary fw-bold mt-2 mb-0">
-                                        €@((item.Product.PriceCents / 100m).ToString("N2"))
-                                    </p>
+                            </div>
 
-                                </div>
+                            <!-- QUANTITY -->
+                            <div class="col-6 col-md-4">
 
-                                <div class="col-md-4">
+                                <span class="cart-item-label">
+                                    Quantity
+                                </span>
 
-                                    <span class="text-muted">
-                                        Quantity
-                                    </span>
+                                <div class="d-flex align-items-center gap-3 mt-2">
 
-                                    <div class="d-flex align-items-center gap-2 mt-2">
+                                    <form method="post"
+                                          asp-page-handler="Decrease"
+                                          asp-route-id="@item.Id">
 
-                                        <form method="post"
-                                            asp-page-handler="Decrease"
-                                            asp-route-id="@item.Id">
+                                        <button type="submit"
+                                                class="cart-quantity-button">
+                                            −
+                                        </button>
 
-                                            <button type="submit"
-                                                    class="btn btn-outline-secondary btn-sm">
-                                                −
-                                            </button>
+                                    </form>
 
-                                        </form>
+                                    <strong class="cart-quantity">
+                                        @item.Quantity
+                                    </strong>
 
-                                        <strong>@item.Quantity</strong>
+                                    <form method="post"
+                                          asp-page-handler="Increase"
+                                          asp-route-id="@item.Id">
 
-                                        <form method="post"
-                                            asp-page-handler="Increase"
-                                            asp-route-id="@item.Id">
+                                        <button type="submit"
+                                                class="cart-quantity-button"
+                                                disabled="@(item.Quantity >= maxQty)">
+                                            +
+                                        </button>
 
-                                            <button type="submit"
-                                                    class="btn btn-outline-secondary btn-sm"
-                                                    disabled="@(item.Quantity >= maxQty)">
-                                                +
-                                            </button>
-
-                                        </form>
-
-                                    </div>
-
-                                    @if (item.Quantity >= maxQty)
-                                    {
-                                        <small class="text-danger">Max stock reached (@maxQty available)</small>
-                                    }
+                                    </form>
 
                                 </div>
 
-                                <div class="col-md-4">
+                                @if (item.Quantity >= maxQty)
+                                {
+                                    <small class="text-danger d-block mt-2">
+                                        Max stock reached (@maxQty available)
+                                    </small>
+                                }
 
-                                    <span class="text-muted">
-                                        Subtotal
-                                    </span>
+                            </div>
 
-                                    <p class="fw-bold text-primary mb-0">
-                                        €@((item.Product.PriceCents *
-                                            (decimal)item.Quantity / 100m).ToString("N2"))
-                                    </p>
+                            <!-- SUBTOTAL -->
+                            <div class="col-6 col-md-4 text-md-end">
 
-                                </div>
+                                <span class="cart-item-label">
+                                    Subtotal
+                                </span>
+
+                                <p class="cart-subtotal mt-2 mb-0">
+                                    € @((item.Product.PriceCents *
+                                        (decimal)item.Quantity / 100m).ToString("N2"))
+                                </p>
 
                             </div>
 
@@ -116,39 +138,41 @@
 
             </div>
 
-            <div class="col-lg-4">
+            <!-- ORDER SUMMARY -->
+            <div class="col-12 col-lg-4">
 
-                <div class="card shadow-sm">
+                <div class="cart-summary p-4">
 
-                    <div class="card-body">
+                    <span class="login-label">ORDER / SUMMARY</span>
 
-                        <h4>Order Summary</h4>
+                    <h4 class="cart-section-title mt-3">
+                        Order Summary
+                    </h4>
 
-                        <hr />
+                    <hr />
 
-                        <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="cart-item-label">
+                            Total
+                        </span>
 
-                            <span>Total:</span>
-
-                            <strong class="text-primary fs-4">
-                                €@Model.TotalPrice.ToString("N2")
-                            </strong>
-
-                        </div>
-
-                        <hr />
-
-                        <a asp-page="/Checkout/Index"
-                           class="btn btn-success w-100 mb-2">
-                            Proceed to Checkout
-                        </a>
-
-                        <a asp-page="/Products/Index"
-                           class="btn btn-outline-secondary w-100">
-                            Continue Shopping
-                        </a>
-
+                        <strong class="cart-total price">
+                             € @Model.TotalPrice.ToString("N2")
+                        </strong>
                     </div>
+
+                    <hr />
+
+                    <a asp-page="/Checkout/Index"
+                       class="btn btn-primary cart-primary-button w-100 mb-3">
+                        Proceed to Checkout
+                        <span>↗</span>
+                    </a>
+
+                    <a asp-page="/Products/Index"
+                       class="btn cart-secondary-button w-100">
+                        Continue Shopping
+                    </a>
 
                 </div>
 

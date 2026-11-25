@@ -1,3 +1,4 @@
+
 @page
 @model Webshop.Pages.Checkout.ConfirmationModel
 
@@ -7,105 +8,155 @@
 
 @if (Model.Order != null && Model.Payment != null)
 {
-    <div class="container mt-5">
+    <div class="container py-5">
 
-        <div class="text-center mb-4">
-            <h1 class="text-success">Payment Successful!</h1>
+        <div class="confirmation-header text-center mb-5">
+            <div class="confirmation-success-icon">
+                <i class="bi bi-check-lg"></i>
+            </div>
 
-            <p class="lead">
-                Thank you for your order.
+            <span class="login-label">PAYMENT COMPLETED</span>
+
+            <h1 class="login-title mt-3">
+                Thank you<span>.</span>
+            </h1>
+
+            <p class="login-description mx-auto">
                 Your payment has been successfully processed.
+                Your order is now confirmed.
             </p>
-            @if (!string.IsNullOrEmpty(Model.EmailWarning))
-{
-    <div class="alert alert-warning">
-        @Model.EmailWarning
-    </div>
-}
         </div>
 
-        <div class="card mb-4">
-            <div class="card-body">
+        @if (!string.IsNullOrEmpty(Model.EmailWarning))
+        {
+            <div class="alert alert-warning rounded-0 mb-4">
+                @Model.EmailWarning
+            </div>
+        }
 
-                <h4>Order Information</h4>
+        <div class="confirmation-wrapper">
 
-                <p>
-                    <strong>Order number:</strong>
-                    @Model.Order.OrderNumber
-                </p>
+            <div class="receipt confirmation-receipt">
 
-                <p>
-                    <strong>Order status:</strong>
-                    @Model.Order.OrderStatus
-                </p>
+                <div class="receipt-header">
 
-                <p>
-                    <strong>Order date:</strong>
-                    @DateTime.SpecifyKind(
-    Model.Order.CreatedAt,
-    DateTimeKind.Utc
-).ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
-                </p>
+                    <span class="receipt-brand">ROAST & TOAST</span>
 
-                <hr />
+                    <span class="receipt-subtitle">
+                        ORDER RECEIPT
+                    </span>
 
-                <h4>Payment Information</h4>
+                    <span class="receipt-number">
+                        #@Model.Order.OrderNumber
+                    </span>
 
-                <p>
-                    <strong>Payment method:</strong>
-                    @Model.Payment.PaymentMethod
-                </p>
+                </div>
 
-                <p>
-                    <strong>Card:</strong>
-                    @Model.Payment.CardBrand ending in
-                    @Model.Payment.CardLast4
-                </p>
+                <div class="receipt-divider"></div>
 
-                <p>
-                    <strong>Transaction ID:</strong>
-                    @Model.Payment.TransactionId
-                </p>
+                <div class="confirmation-meta">
 
-                <p>
-                    <strong>Payment status:</strong>
-                    @Model.Payment.PaymentStatus
-                </p>
+                    <div>
+                        <span>ORDER DATE</span>
+                        <strong>
+                            @DateTime.SpecifyKind(
+                                Model.Order.CreatedAt,
+                                DateTimeKind.Utc
+                            ).ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                        </strong>
+                    </div>
 
-                <hr />
+                    <div>
+                        <span>ORDER STATUS</span>
+                        <strong>@Model.Order.OrderStatus</strong>
+                    </div>
 
-                <h4>Ordered Products</h4>
+                </div>
+
+                <div class="receipt-divider"></div>
+
+                <div class="confirmation-section-label">
+                    ORDERED PRODUCTS
+                </div>
 
                 @foreach (var item in Model.Order.Items)
                 {
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>
-                            @item.ProductName
-                            (x @item.Quantity)
-                        </span>
+                    <div class="receipt-item">
 
-                        <span>
+                        <div class="receipt-item-info">
+                            <span>@item.ProductName</span>
+                            <small>Quantity: @item.Quantity</small>
+                        </div>
+
+                        <span class="receipt-price">
                             @((item.SubtotalCents / 100m).ToString("C"))
                         </span>
+
                     </div>
                 }
 
-                <hr />
+                <div class="receipt-divider"></div>
 
-                <div class="d-flex justify-content-between">
-                    <h5>Total</h5>
+                <div class="receipt-total">
+                    <span>TOTAL</span>
 
-                    <h5>
+                    <strong class="price">
                         @((Model.Order.TotalPriceCents / 100m).ToString("C"))
-                    </h5>
+                    </strong>
+                </div>
+
+                <div class="receipt-divider"></div>
+
+                <div class="confirmation-section-label">
+                    PAYMENT INFORMATION
+                </div>
+
+                <div class="confirmation-payment-info">
+
+                    <div>
+                        <span>Payment method</span>
+                        <strong>@Model.Payment.PaymentMethod</strong>
+                    </div>
+
+                    <div>
+                        <span>Card</span>
+                        <strong>
+                            @Model.Payment.CardBrand ending in @Model.Payment.CardLast4
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Transaction ID</span>
+                        <strong class="confirmation-transaction">
+                            @Model.Payment.TransactionId
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Payment status</span>
+                        <strong>@Model.Payment.PaymentStatus</strong>
+                    </div>
+
+                </div>
+
+                <div class="confirmation-paid-stamp">
+                    PAID
+                </div>
+
+                <div class="receipt-footer">
+                    <span>THANK YOU FOR YOUR ORDER</span>
+                    <span>ROAST & TOAST PREMIUM</span>
+                    <span>BUILT FOR BETTER BAKING.</span>
                 </div>
 
             </div>
+
         </div>
 
-        <div class="text-center">
-            <a asp-page="/Index" class="btn btn-primary">
+        <div class="text-center mt-5">
+            <a asp-page="/Index" class="btn btn-primary confirmation-button">
                 Continue Shopping
+                <span>↗</span>
             </a>
         </div>
 

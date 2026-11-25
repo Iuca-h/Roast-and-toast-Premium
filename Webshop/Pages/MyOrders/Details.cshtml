@@ -10,215 +10,316 @@
 {
     var order = Model.Order;
 
-    <div class="container mt-4">
+    <div class="container">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-5">
+
             <div>
-                <h1>Order Details</h1>
-                <p class="text-muted mb-0">
+                <h1 class="products-title mt-3">
+                    Order Details<span>.</span>
+                </h1>
+
+                <p class="login-description mb-0">
                     Order #@order.OrderNumber
                 </p>
             </div>
 
             <a asp-page="/MyOrders/Index"
-               class="btn btn-outline-secondary">
+               class="order-back-button">
+                <span>←</span>
                 Back to My Orders
             </a>
+
         </div>
 
-        <!-- Order Information -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4>Order Information</h4>
+        <div class="order-details-layout">
 
-                <p>
-                    <strong>Order date:</strong>
-                    @DateTime.SpecifyKind(
-                        order.CreatedAt,
-                        DateTimeKind.Utc
-                    ).ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
-                </p>
+            <!-- ORDER OVERVIEW -->
 
-                <p>
-                    <strong>Order status:</strong>
+            <section class="order-details-card order-details-overview">
+
+                <div class="order-details-heading">
+                    <div>
+                        <span class="order-details-label">ORDER INFORMATION</span>
+                        <h3 class="order-details-title mt-2">
+                            Order overview
+                        </h3>
+                    </div>
 
                     @if (order.OrderStatus == "Paid")
                     {
-                        <span class="badge bg-success">Paid</span>
+                        <span class="order-status order-status-paid">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Paid
+                        </span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark">
+                        <span class="order-status order-status-other">
                             @order.OrderStatus
                         </span>
                     }
-                </p>
+                </div>
 
-                <p>
-                    <strong>Total:</strong>
-                    @((order.TotalPriceCents / 100m)
-                        .ToString("C"))
-                </p>
-            </div>
-        </div>
+                <div class="row g-4 mt-2">
 
-        <!-- Products -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4>Products</h4>
+                    <div class="col-12 col-md-4">
+                        <span class="order-details-label">ORDER NUMBER</span>
+                        <p class="order-details-value mt-2">
+                            #@order.OrderNumber
+                        </p>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <span class="order-details-label">ORDER DATE</span>
+                        <p class="order-details-value mt-2">
+                            @DateTime.SpecifyKind(
+                                order.CreatedAt,
+                                DateTimeKind.Utc
+                            ).ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
+                        </p>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <span class="order-details-label">TOTAL AMOUNT</span>
+                        <p class="order-details-price price mt-2">
+                           @((order.TotalPriceCents / 100m).ToString("C"))
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- PRODUCTS -->
+
+            <section class="order-details-card">
+
+                <div class="order-details-heading mb-3">
+                    <div>
+                        <span class="order-details-label">ORDER CONTENTS</span>
+                        <h3 class="order-details-title mt-2">
+                            Products
+                        </h3>
+                    </div>
+
+                    <span class="order-details-count">
+                        @order.Items.Sum(i => i.Quantity) ITEMS
+                    </span>
+                </div>
 
                 @foreach (var item in order.Items)
                 {
-                    <div class="d-flex justify-content-between
-                                align-items-center border-bottom py-3">
+                    <div class="order-product-row">
 
-                        <div>
-                            <strong>@item.ProductName</strong>
+                        <div class="order-product-info">
+                            <span class="order-product-name">
+                                @item.ProductName
+                            </span>
 
-                            <div class="text-muted">
+                            <span class="order-product-model">
                                 Model: @item.ProductModel
-                            </div>
+                            </span>
 
-                            <div class="text-muted">
+                            <span class="order-product-model">
                                 Quantity: @item.Quantity
-                            </div>
+                            </span>
                         </div>
 
-                        <div class="text-end">
+                        <div class="order-product-pricing">
                             <strong>
-                                @((item.SubtotalCents / 100m)
-                                    .ToString("C"))
+                                @((item.SubtotalCents / 100m).ToString("C"))
                             </strong>
 
-                            <div class="text-muted">
-                                @((item.UnitPriceCents / 100m)
-                                    .ToString("C")) each
-                            </div>
+                            <span>
+                                @((item.UnitPriceCents / 100m).ToString("C")) each
+                            </span>
                         </div>
 
                     </div>
                 }
 
-                <div class="d-flex justify-content-between mt-3">
-                    <h5>Total</h5>
+            </section>
 
-                    <h5>
-                        @((order.TotalPriceCents / 100m)
-                            .ToString("C"))
-                    </h5>
+            <!-- SHIPPING INFORMATION -->
+
+            <section class="order-details-card">
+
+                <div class="order-details-heading mb-4">
+                    <div>
+                        <span class="order-details-label">DELIVERY DETAILS</span>
+                        <h3 class="order-details-title mt-2">
+                            Shipping Information
+                        </h3>
+                    </div>
+
+                    <div class="order-details-icon">
+                        <i class="bi bi-truck"></i>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Shipping Information -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4>Shipping Information</h4>
+                <div class="row g-4">
 
-                <p>
-                    <strong>Name:</strong>
-                    @order.FirstName @order.LastName
-                </p>
+                    <div class="col-12 col-md-6">
 
-                <p>
-                    <strong>Email:</strong>
-                    @order.Email
-                </p>
+                        <div class="order-shipping-field">
+                            <span>FULL NAME</span>
+                            <strong>@order.FirstName @order.LastName</strong>
+                        </div>
 
-                <p>
-                    <strong>Phone:</strong>
-                    @order.PhoneNumber
-                </p>
+                        <div class="order-shipping-field">
+                            <span>EMAIL ADDRESS</span>
+                            <strong>@order.Email</strong>
+                        </div>
 
-                <p>
-                    <strong>Address:</strong><br />
-                    @order.StreetAddress<br />
-                    @order.PostalCode @order.City<br />
-                    @order.Country
-                </p>
+                        <div class="order-shipping-field">
+                            <span>PHONE NUMBER</span>
+                            <strong>@order.PhoneNumber</strong>
+                        </div>
 
-                @if (!string.IsNullOrWhiteSpace(order.AdditionalInformation))
-                {
-                    <p>
-                        <strong>Additional information:</strong><br />
-                        @order.AdditionalInformation
-                    </p>
-                }
-            </div>
-        </div>
+                    </div>
 
-        <!-- Payment Information -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4>Payment History</h4>
+                    <div class="col-12 col-md-6">
+
+                        <div class="order-shipping-field">
+                            <span>DELIVERY ADDRESS</span>
+
+                            <strong>
+                                @order.StreetAddress
+                                <br />
+                                @order.PostalCode @order.City
+                                <br />
+                                @order.Country
+                            </strong>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(order.AdditionalInformation))
+                        {
+                            <div class="order-shipping-field mt-4">
+                                <span>ADDITIONAL INFORMATION</span>
+                                <strong>@order.AdditionalInformation</strong>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- PAYMENT HISTORY -->
+
+            <section class="order-details-card">
+
+                <div class="order-details-heading mb-3">
+                    <div>
+                        <span class="order-details-label">TRANSACTIONS</span>
+                        <h3 class="order-details-title mt-2">
+                            Payment History
+                        </h3>
+                    </div>
+
+                    <div class="order-details-icon">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                </div>
 
                 @if (order.Payments.Count == 0)
                 {
-                    <p class="text-muted">
+                    <div class="order-payment-empty">
+                        <i class="bi bi-info-circle me-2"></i>
                         No payment attempts found.
-                    </p>
+                    </div>
                 }
                 else
                 {
-                    @foreach (var payment in order.Payments
-                        .OrderByDescending(p => p.CreatedAt))
+                    @foreach (var payment in order.Payments.OrderByDescending(p => p.CreatedAt))
                     {
-                        <div class="border-bottom py-3">
+                        <div class="order-payment-entry">
 
-                            <p>
-                                <strong>Method:</strong>
-                                @payment.PaymentMethod
-                            </p>
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
 
-                            <p>
-                                <strong>Status:</strong>
+                                <div>
+                                    <span class="order-details-label">PAYMENT METHOD</span>
+                                    <p class="order-details-value mt-2 mb-0">
+                                        @payment.PaymentMethod
+                                    </p>
+                                </div>
 
                                 @if (payment.PaymentStatus == "Succeeded")
                                 {
-                                    <span class="badge bg-success">
+                                    <span class="order-status order-status-paid">
+                                        <i class="bi bi-check-circle me-1"></i>
                                         Succeeded
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger">
+                                    <span class="order-status order-status-other">
                                         @payment.PaymentStatus
                                     </span>
                                 }
-                            </p>
 
-                            <p>
-                                <strong>Amount:</strong>
-                                @((payment.AmountCents / 100m)
-                                    .ToString("C"))
-                            </p>
+                            </div>
 
-                            @if (!string.IsNullOrEmpty(payment.CardLast4))
-                            {
-                                <p>
-                                    <strong>Card:</strong>
-                                    @payment.CardBrand ending in
-                                    @payment.CardLast4
-                                </p>
-                            }
+                            <div class="row g-4">
 
-                            <p>
-                                <strong>Transaction ID:</strong>
-                                <code>@payment.TransactionId</code>
-                            </p>
+                                <div class="col-12 col-md-6">
+                                    <div class="order-shipping-field">
+                                        <span>AMOUNT</span>
+                                        <strong>
+                                            @((payment.AmountCents / 100m).ToString("C"))
+                                        </strong>
+                                    </div>
+                                </div>
 
-                            <p>
-                                <strong>Date:</strong>
-                                @DateTime.SpecifyKind(
-                                    payment.CreatedAt,
-                                    DateTimeKind.Utc
-                                ).ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
-                            </p>
+                                <div class="col-12 col-md-6">
+                                    <div class="order-shipping-field">
+                                        <span>CARD</span>
+
+                                        <strong>
+                                            @if (!string.IsNullOrEmpty(payment.CardLast4))
+                                            {
+                                                @payment.CardBrand
+                                                <text> ending in @payment.CardLast4</text>
+                                            }
+                                            else
+                                            {
+                                                <text>Not available</text>
+                                            }
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="order-shipping-field">
+                                        <span>TRANSACTION ID</span>
+                                        <strong class="order-transaction-id">
+                                            @payment.TransactionId
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="order-shipping-field">
+                                        <span>PAYMENT DATE</span>
+                                        <strong>
+                                            @DateTime.SpecifyKind(
+                                                payment.CreatedAt,
+                                                DateTimeKind.Utc
+                                            ).ToLocalTime().ToString("dd MMMM yyyy, HH:mm")
+                                        </strong>
+                                    </div>
+                                </div>
+
+                            </div>
 
                         </div>
                     }
                 }
-            </div>
+
+            </section>
+
         </div>
 
     </div>

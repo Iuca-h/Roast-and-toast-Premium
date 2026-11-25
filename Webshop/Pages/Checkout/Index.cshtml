@@ -1,4 +1,3 @@
-
 @page
 @model Webshop.Pages.Checkout.IndexModel
 
@@ -6,143 +5,239 @@
     ViewData["Title"] = "Checkout";
 }
 
-<h1>Checkout</h1>
+<div class="container">
 
-@if (Model.ShoppingCart != null)
-{
-    <div class="row">
-        <div class="col-md-7">
-            <h3>Shipping Information</h3>
+    <div class="mb-5">
+        <h1 class="products-title mt-3">
+            Check<span>out.</span>
+        </h1>
 
-            <form method="post">
-                <div asp-validation-summary="ModelOnly"
-                     class="text-danger"></div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.FirstName"
-                           class="form-label"></label>
-                    <input asp-for="Input.FirstName"
-                           class="form-control" />
-                    <span asp-validation-for="Input.FirstName"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.LastName"
-                           class="form-label"></label>
-                    <input asp-for="Input.LastName"
-                           class="form-control" />
-                    <span asp-validation-for="Input.LastName"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.Email"
-                           class="form-label"></label>
-                    <input asp-for="Input.Email"
-                           class="form-control" />
-                    <span asp-validation-for="Input.Email"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.PhoneNumber"
-                           class="form-label"></label>
-                    <input asp-for="Input.PhoneNumber"
-                           class="form-control" />
-                    <span asp-validation-for="Input.PhoneNumber"
-                          class="text-danger"></span>
-                </div>
-
-                <hr />
-
-                <h3>Delivery Address</h3>
-
-                <div class="mb-3">
-                    <label asp-for="Input.Country"
-                           class="form-label"></label>
-                    <input asp-for="Input.Country"
-                           class="form-control" />
-                    <span asp-validation-for="Input.Country"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.City"
-                           class="form-label"></label>
-                    <input asp-for="Input.City"
-                           class="form-control" />
-                    <span asp-validation-for="Input.City"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.StreetAddress"
-                           class="form-label"></label>
-                    <input asp-for="Input.StreetAddress"
-                           class="form-control" />
-                    <span asp-validation-for="Input.StreetAddress"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.PostalCode"
-                           class="form-label"></label>
-                    <input asp-for="Input.PostalCode"
-                           class="form-control" />
-                    <span asp-validation-for="Input.PostalCode"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.AdditionalInformation"
-                           class="form-label"></label>
-                    <textarea asp-for="Input.AdditionalInformation"
-                              class="form-control"></textarea>
-                    <span asp-validation-for="Input.AdditionalInformation"
-                          class="text-danger"></span>
-                </div>
-                
-                <div class="form-check mb-3">
-                    <input asp-for="Input.SaveToProfile" class="form-check-input" />
-                    
-                    <label asp-for="Input.SaveToProfile" class="form-check-label">
-                        Save my information to my profile for future purchases
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Continue to Payment
-                </button>
-            </form>
-        </div>
-
-        <div class="col-md-5">
-            <h3>Order Summary</h3>
-
-            @foreach (var item in Model.ShoppingCart.Items)
-            {
-                <div class="d-flex justify-content-between mb-2">
-                    <span>
-                        @item.Product.Name × @item.Quantity
-                    </span>
-
-                    <span>
-                        @((item.Product.PriceCents *
-                            (decimal)item.Quantity / 100m).ToString("C"))
-                    </span>
-                </div>
-            }
-
-            <hr />
-
-            <div class="d-flex justify-content-between">
-                <strong>Total</strong>
-                <strong>@Model.TotalPrice.ToString("C")</strong>
-            </div>
-        </div>
+        <p class="login-description">
+            Complete your shipping information to continue with your order.
+        </p>
     </div>
-}
+
+    @if (Model.ShoppingCart != null)
+    {
+        <div class="row g-4 g-lg-5">
+
+            <!-- SHIPPING INFORMATION -->
+            <div class="col-12 col-lg-7">
+
+                <div class="checkout-card p-4 p-md-5">
+
+                    <span class="login-label">DELIVERY / INFORMATION</span>
+
+                    <h3 class="checkout-section-title mt-3 mb-4">
+                        Shipping Information
+                    </h3>
+
+                    <form method="post">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger validation-message mb-3">
+                        </div>
+
+                        <div class="row g-3">
+
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Input.FirstName"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.FirstName"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.FirstName"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Input.LastName"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.LastName"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.LastName"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Input.Email"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.Email"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.Email"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Input.PhoneNumber"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.PhoneNumber"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.PhoneNumber"
+                                      class="text-danger small"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="checkout-divider"></div>
+
+                        <span class="login-label">DELIVERY / ADDRESS</span>
+
+                        <h3 class="checkout-section-title mt-3 mb-4">
+                            Delivery Address
+                        </h3>
+
+                        <div class="row g-3">
+
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Input.Country"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.Country"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.Country"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Input.City"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.City"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.City"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Input.StreetAddress"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.StreetAddress"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.StreetAddress"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Input.PostalCode"
+                                       class="form-label checkout-label"></label>
+
+                                <input asp-for="Input.PostalCode"
+                                       class="form-control checkout-input" />
+
+                                <span asp-validation-for="Input.PostalCode"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Input.AdditionalInformation"
+                                       class="form-label checkout-label"></label>
+
+                                <textarea asp-for="Input.AdditionalInformation"
+                                          class="form-control checkout-input"
+                                          rows="3"></textarea>
+
+                                <span asp-validation-for="Input.AdditionalInformation"
+                                      class="text-danger small"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="form-check mt-4 mb-4">
+                            <input asp-for="Input.SaveToProfile"
+                                   class="form-check-input checkout-checkbox" />
+
+                            <label asp-for="Input.SaveToProfile"
+                                   class="form-check-label checkout-label">
+                                Save my information to my profile for future purchases
+                            </label>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary checkout-submit w-100">
+                            Continue to Payment
+                            <span>↗</span>
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <!-- ORDER RECEIPT -->
+            <div class="col-12 col-lg-5">
+
+                <div class="receipt">
+
+                    <div class="receipt-header">
+                        <span class="receipt-brand">ROAST & TOAST</span>
+                        <span class="receipt-subtitle">ORDER RECEIPT</span>
+                        <span class="receipt-number">TRANSACTION / 001</span>
+                    </div>
+
+                    <div class="receipt-divider"></div>
+
+                    <div class="receipt-column-labels">
+                        <span>ITEM</span>
+                        <span>PRICE</span>
+                    </div>
+
+                    <div class="receipt-items">
+
+                        @foreach (var item in Model.ShoppingCart.Items)
+                        {
+                            <div class="receipt-item">
+
+                                <div class="receipt-item-info">
+                                    <span>@item.Product.Name</span>
+                                    <small>Qty: @item.Quantity</small>
+                                </div>
+
+                                <span class="receipt-price">
+                                    €@((item.Product.PriceCents *
+                                        (decimal)item.Quantity / 100m).ToString("N2"))
+                                </span>
+
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="receipt-divider"></div>
+
+                    <div class="receipt-total">
+                        <span>TOTAL</span>
+
+                        <strong>
+                            €@Model.TotalPrice.ToString("N2")
+                        </strong>
+                    </div>
+
+                    <div class="receipt-footer">
+                        <span>THANK YOU FOR YOUR ORDER</span>
+                        <span>ROAST & TOAST / PREMIUM EQUIPMENT</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
