@@ -52,10 +52,15 @@ public class DetailsModel : PageModel
             return Challenge();
         }
 
-        await _cartService.AddToCartAsync(userId, id);
-
-        TempData["CartMessage"] =
-            "Product successfully added to cart!";
+        try
+        {
+            await _cartService.AddToCartAsync(userId, id);
+            TempData["CartMessage"] = "Product successfully added to cart!";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["CartError"] = ex.Message;
+        }
 
         return RedirectToPage("/Products/Details", new { id });
     }

@@ -12,10 +12,17 @@
         &larr; Back to Products
     </a>
 
-    @if (TempData["CartMessage"] != null)
+    @if (TempData["CartMessage"] is string cartMessage)
     {
-        <div class="alert alert-success">
-            @TempData["CartMessage"]
+        <div class="alert alert-success" role="alert">
+            @cartMessage
+        </div>
+    }
+
+    @if (TempData["CartError"] is string cartError)
+    {
+        <div class="alert alert-danger" role="alert">
+            @cartError
         </div>
     }
 

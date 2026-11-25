@@ -40,6 +40,7 @@ public class IndexModel : PageModel
         ShoppingCart = await _context.Carts
             .Include(c => c.Items)
             .ThenInclude(i => i.Product)
+            .ThenInclude(p => p.Stock)
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == userId);
 
@@ -53,8 +54,7 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostIncreaseAsync(int id)
     {
-        var userId = User.FindFirstValue(
-            ClaimTypes.NameIdentifier)!;
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var item = await _context.CartItems
             .Include(i => i.Cart)
@@ -66,8 +66,14 @@ public class IndexModel : PageModel
             return NotFound();
         }
 
-        await _cartService.UpdateQuantityAsync(
-            userId, id, item.Quantity + 1);
+        try
+        {
+            await _cartService.UpdateQuantityAsync(userId, id, item.Quantity + 1);
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["CartError"] = ex.Message;
+        }
 
         return RedirectToPage();
     }
