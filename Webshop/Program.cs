@@ -124,7 +124,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/Admin", "AdminOrDba");
-    options.Conventions.AuthorizeFolder("/Dba", "AdminOrDba");
+    options.Conventions.AuthorizeFolder("/Dba", "DBA");
 });
 
 var app = builder.Build();

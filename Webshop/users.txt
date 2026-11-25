@@ -1,9 +1,10 @@
 
 dotnet user-secrets set "SeedDba:Email" "dba@example.com"
-dotnet user-secrets set "SeedDba:Password" "V9#qL2!xR8@pM5"
-
+dotnet user-secrets set "SeedDba:Password" "D-baassword1243!"
 dotnet user-secrets set "SeedAdmin:Email" "admin@example.com"
-dotnet user-secrets set "SeedAdmin:Password" "T6@wN9#kF3!yP8"
+dotnet user-secrets set "SeedAdmin:Password" "A-dminassword1243!"
+dotnet user-secrets set "SeedUser:Email" "user@example.com"
+dotnet user-secrets set "SeedUser:Password" "U-serassword1243!"
 
 dotnet user-secrets set "SeedUser:Email" "user@example.com"
 dotnet user-secrets set "SeedUser:Password" "H4!mQ7@zB9#sX2&cL5"
