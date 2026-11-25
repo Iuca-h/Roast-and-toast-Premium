@@ -34,9 +34,8 @@
 
                 @if (Model.Product!.ImageData != null)
                 {
-                    <img src="/Products/Image/@Model.Product.Id"
-                         class="details-image"
-                         alt="@Model.Product.Name" />
+                    <img src="@Url.Page("/Products/Details", "Image", new { id = Model.Product.Id })"
+                        alt="@Model.Product.Name" class="product-image">
                 }
                 else
                 {

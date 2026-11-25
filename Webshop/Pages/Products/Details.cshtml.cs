@@ -64,4 +64,19 @@ public class DetailsModel : PageModel
 
         return RedirectToPage("/Products/Details", new { id });
     }
+    
+    public async Task<IActionResult> OnGetImageAsync(int id)
+{
+    var imageData = await _context.Products
+        .Where(p => p.Id == id)
+        .Select(p => p.ImageData)
+        .FirstOrDefaultAsync();
+
+    if (imageData == null || imageData.Length == 0)
+    {
+        return NotFound();
+    }
+
+    return File(imageData, "image/png");
+}
 }

@@ -29,9 +29,8 @@
                     @if (product.ImageData != null)
                     {
                         <div class="product-image-wrapper">
-                            <img src="/Products/Image/@product.Id"
-                                 class="product-image"
-                                 alt="@product.Name" />
+                        <img src="@Url.Page("/Products/Index", "Image", new { id = product.Id })" 
+                            alt="@product.Name" class="product-image">
                         </div>
                     }
                     else

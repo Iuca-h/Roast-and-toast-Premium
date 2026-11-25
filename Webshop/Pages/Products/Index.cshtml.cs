@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Webshop.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Webshop.Pages.Products;
 
@@ -24,4 +25,17 @@ public class IndexModel : PageModel
             .AsNoTracking()
             .ToListAsync();
     }
+    
+public async Task<IActionResult> OnGetImageAsync(int id)
+{
+    var imageData = await _context.Products
+        .Where(p => p.Id == id)
+        .Select(p => p.ImageData)
+        .FirstOrDefaultAsync();
+
+    if (imageData == null || imageData.Length == 0)
+        return NotFound();
+
+    return File(imageData, "image/png");
+}
 }
