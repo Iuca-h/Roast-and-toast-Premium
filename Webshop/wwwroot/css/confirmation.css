@@ -1,0 +1,191 @@
+
+/* =========================
+   ORDER CONFIRMATION
+========================= */
+
+.confirmation-header {
+    animation: confirmation-fade-in 0.7s ease both;
+}
+
+.confirmation-success-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 22px;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-size: 2rem;
+    animation: confirmation-icon-pop 0.6s ease both;
+}
+
+.confirmation-wrapper {
+    display: flex;
+    justify-content: center;
+    perspective: 1000px;
+}
+
+.confirmation-receipt {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    padding: 40px;
+    overflow: hidden;
+    animation: receipt-appear 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.confirmation-meta {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 0.8rem;
+}
+
+.confirmation-meta div,
+.confirmation-payment-info div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.confirmation-meta span,
+.confirmation-payment-info span {
+    color: var(--color-secondary);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+}
+
+.confirmation-meta strong,
+.confirmation-payment-info strong {
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.confirmation-section-label {
+    margin-bottom: 10px;
+    color: var(--color-secondary);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+}
+
+.confirmation-payment-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.confirmation-transaction {
+    font-size: 0.7rem !important;
+}
+
+/* .confirmation-paid-stamp {
+    position: absolute;
+    top: 45%;
+    right: 35px;
+    padding: 8px 18px;
+    border: 3px solid var(--color-accent);
+    color: var(--color-accent);
+    font-family: var(--font-accent);
+    font-size: 1.3rem;
+    letter-spacing: 0.12em;
+    transform: rotate(-12deg) scale(0.5);
+    opacity: 0;
+    animation: paid-stamp-appear 0.5s ease 0.9s forwards;
+} */
+
+.confirmation-button {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 45px;
+    padding: 14px 20px;
+    border-radius: 0;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-primary);
+    font-weight: 500;
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.confirmation-button:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes confirmation-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes confirmation-icon-pop {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    70% {
+        transform: scale(1.12);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes receipt-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-35px) rotateX(5deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+    }
+}
+
+@keyframes paid-stamp-appear {
+    0% {
+        opacity: 0;
+        transform: rotate(-12deg) scale(0.5);
+    }
+
+    70% {
+        opacity: 1;
+        transform: rotate(-12deg) scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: rotate(-12deg) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirmation-header,
+    .confirmation-success-icon,
+    .confirmation-receipt,
+    .confirmation-paid-stamp {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

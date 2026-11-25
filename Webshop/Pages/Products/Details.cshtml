@@ -1,4 +1,3 @@
-
 @page "{id:int}"
 @model Webshop.Pages.Products.DetailsModel
 
@@ -6,115 +5,135 @@
     ViewData["Title"] = Model.Product?.Name ?? "Product Details";
 }
 
-<div class="container mt-4">
+<div class="container">
 
-    <a asp-page="./Index" class="btn btn-outline-secondary mb-4">
+    <a asp-page="./Index" class="details-back-link mb-4">
         &larr; Back to Products
     </a>
 
     @if (TempData["CartMessage"] is string cartMessage)
     {
-        <div class="alert alert-success" role="alert">
+        <div class="alert alert-success rounded-0" role="alert">
             @cartMessage
         </div>
     }
 
     @if (TempData["CartError"] is string cartError)
     {
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger rounded-0" role="alert">
             @cartError
         </div>
     }
 
-    <div class="row g-5">
+    <div class="row g-4 g-lg-5 mt-2">
 
-        <div class="col-md-6">
+        <!-- PRODUCT IMAGE -->
+        <div class="col-12 col-lg-6">
 
-            @if (Model.Product!.ImageData != null)
-            {
-                <img src="/Products/Image/@Model.Product.Id"
-                     class="img-fluid rounded shadow-sm"
-                     alt="@Model.Product.Name"
-                     style="max-height: 500px; width: 100%; object-fit: contain;" />
-            }
-            else
-            {
-                <div class="bg-light rounded d-flex align-items-center justify-content-center"
-                     style="height: 400px;">
-                    <span class="text-muted">No image available</span>
-                </div>
-            }
+            <div class="details-image-wrapper">
+
+                @if (Model.Product!.ImageData != null)
+                {
+                    <img src="/Products/Image/@Model.Product.Id"
+                         class="details-image"
+                         alt="@Model.Product.Name" />
+                }
+                else
+                {
+                    <div class="details-image-empty">
+                        No image available
+                    </div>
+                }
+
+            </div>
 
         </div>
 
-        <div class="col-md-6">
+        <!-- PRODUCT INFORMATION -->
+        <div class="col-12 col-lg-6">
 
-            <h1>@Model.Product.Name</h1>
+            <div class="details-information">
 
-            <p class="text-muted fs-5">
-                Model: @Model.Product.Model
-            </p>
+                <span class="login-label">PRODUCT DETAILS / 01</span>
 
-            <h2 class="text-primary my-4">
-                €@((Model.Product.PriceCents / 100m).ToString("N2"))
-            </h2>
+                <h1 class="details-title mt-3">
+                    @Model.Product.Name
+                </h1>
 
-            <form method="post"
-                  asp-page-handler="AddToCart"
-                  asp-route-id="@Model.Product.Id"
-                  class="d-flex align-items-center justify-content-between">
+                <p class="details-model mt-2">
+                    Model: @Model.Product.Model
+                </p>
 
-                <button type="submit" class="btn btn-success btn-lg">
-                    <i class="bi bi-cart-plus"></i>
-                    Add to Cart
-                </button>
-                @if (@Model.Product.Stock.StockAmount > 0)
+                <h2 class="details-price my-4 price">
+                    € @((Model.Product.PriceCents / 100m).ToString("N2"))
+                </h2>
+
+                <form method="post"
+                      asp-page-handler="AddToCart"
+                      asp-route-id="@Model.Product.Id"
+                      class="details-cart-form mb-4">
+
+                    <button type="submit" class="btn btn-primary details-cart-button">
+                        <i class="bi bi-cart-plus"></i>
+                        Add to Cart
+                        <span>↗</span>
+                    </button>
+
+                    @if (Model.Product.Stock.StockAmount > 0)
                     {
-                        <span class="text-secondary fs-4">In Stock: @Model.Product.Stock.StockAmount</span>
+                        <span class="details-stock in-stock">
+                            In stock: @Model.Product.Stock.StockAmount
+                        </span>
                     }
                     else
                     {
-                        <span class="text-danger fs-4">Out of Stock</span>
+                        <span class="details-stock out-of-stock">
+                            Out of stock
+                        </span>
                     }
 
+                </form>
 
-            </form>
+                <div class="details-section">
 
-            <hr />
+                    <h4 class="details-section-title">Specifications</h4>
 
-            <h4>Specifications</h4>
+                    <table class="table details-table">
+                        <tbody>
+                            <tr>
+                                <th>Capacity</th>
+                                <td>@Model.Product.Capacity</td>
+                            </tr>
+                            <tr>
+                                <th>Power</th>
+                                <td>@Model.Product.PowerKw kW</td>
+                            </tr>
+                            <tr>
+                                <th>Material</th>
+                                <td>@Model.Product.Material</td>
+                            </tr>
+                            <tr>
+                                <th>Dimensions</th>
+                                <td>@Model.Product.Dimensions</td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-            <table class="table">
-                <tbody>
-                    <tr>
-                        <th>Capacity</th>
-                        <td>@Model.Product.Capacity</td>
-                    </tr>
-                    <tr>
-                        <th>Power</th>
-                        <td>@Model.Product.PowerKw kW</td>
-                    </tr>
-                    <tr>
-                        <th>Material</th>
-                        <td>@Model.Product.Material</td>
-                    </tr>
-                    <tr>
-                        <th>Dimensions</th>
-                        <td>@Model.Product.Dimensions</td>
-                    </tr>
-                </tbody>
-            </table>
+                </div>
 
-            <hr />
+                <div class="details-section mt-4">
 
-            <h4>Description</h4>
+                    <h4 class="details-section-title">Description</h4>
 
-            <p style="white-space: pre-line;">
-                @Model.Product.Description
-            </p>
+                    <p class="details-description">
+                        @Model.Product.Description
+                    </p>
+
+                </div>
+
+            </div>
 
         </div>
 
     </div>
-
 </div>

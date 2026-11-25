@@ -1,0 +1,126 @@
+
+/* =========================
+   PAYMENT PAGE
+========================= */
+
+.payment-card {
+    width: 100%;
+    background-color: var(--color-white);
+    border: 1px solid #E5E8ED;
+    box-shadow: 8px 8px 0 var(--color-surface);
+}
+
+.payment-content {
+    width: 100%;
+}
+
+.payment-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    font-size: 1.5rem;
+}
+
+.payment-section-title {
+    color: var(--color-primary);
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.payment-label {
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.payment-input {
+    min-height: 48px;
+    border-radius: 0;
+    border: 1px solid #DDE2E8;
+    background-color: #FAFAFA;
+    color: var(--color-primary);
+    box-shadow: none;
+}
+
+.payment-input:focus {
+    border-color: var(--color-accent);
+    background-color: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(196, 119, 80, 0.12);
+}
+
+.payment-notice {
+    padding: 16px 18px;
+    background-color: #F0F2F5;
+    border-left: 3px solid var(--color-accent);
+    color: var(--color-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.payment-divider {
+    border-top: 1px solid #E5E8ED;
+}
+
+.payment-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    min-width: 220px;
+    padding: 15px 20px;
+    border-radius: 0;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-primary);
+    font-weight: 500;
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.payment-button:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.payment-security {
+    color: var(--color-secondary);
+    font-size: 0.85rem;
+}
+
+.payment-3ds-panel {
+    width: 100%;
+    padding: 30px;
+    background-color: #F7F8F9;
+    border: 1px solid #E5E8ED;
+}
+
+.payment-3ds-visual {
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.payment-3ds-visual i {
+    font-size: 5rem;
+    color: var(--color-accent);
+}
+
+.payment-3ds-visual span {
+    font-family: var(--font-accent);
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+}
+
+.payment-description {
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}

@@ -1,10 +1,186 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- HERO SECTION -->
+<section class="container py-5 my-lg-5">
+    <div class="row align-items-center g-5">
+
+        <div class="col-12 col-lg-7">
+
+            <p class="hero-label mb-4">
+                <span class="hero-label-mark"></span>
+                PROFESSIONAL BAKERY EQUIPMENT
+            </p>
+
+            <h1 class="hero-title mb-4">
+                Built for<br />
+                <span>better</span> baking.
+            </h1>
+
+            <p class="hero-description mb-4">
+                Reliable bakery machinery for professionals who
+                care about quality, precision and efficiency.
+            </p>
+
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mt-4">
+
+                <a asp-page="/Products/Index"
+                   class="btn btn-dark hero-button">
+                    Explore equipment
+                    <span class="ms-4">↗</span>
+                </a>
+
+                <a href="#contact" class="hero-text-link">
+                    Get in touch
+                </a>
+
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+
+            <div class="hero-visual">
+
+                <div class="visual-top d-flex justify-content-between">
+                    <span>BAKERY SYSTEMS</span>
+                    <span>RT—001</span>
+                </div>
+
+                <div class="visual-shape">
+
+                    <div class="shape-square"></div>
+                    <div class="shape-circle"></div>
+                    <div class="shape-line"></div>
+
+                    <span class="shape-number">01</span>
+
+                </div>
+
+                <div class="visual-bottom d-flex justify-content-between align-items-end">
+                    <span>ENGINEERED FOR</span>
+                    <strong>THE CRAFT.</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- CONTACT SECTION -->
+<section class="container py-5 my-lg-5 border-top" id="contact">
+
+    <div class="row g-4 g-lg-5">
+
+        <div class="col-12 col-lg-5">
+
+            <h2 class="contact-title my-4">
+                Have a<br />
+                <span>question?</span>
+            </h2>
+
+            <p class="contact-description">
+                Need access to an account or have a question about
+                our equipment? Send us a message.
+            </p>
+
+        </div>
+
+        <div class="col-12 col-lg-7">
+
+            <form class="contact-form p-3 p-md-4 p-lg-5">
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6">
+                        <label for="firstName" class="form-label">
+                            First name
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="firstName"
+                               placeholder="Your first name" />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label for="lastName" class="form-label">
+                            Last name
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="lastName"
+                               placeholder="Your last name" />
+                    </div>
+
+                    <div class="col-12">
+                        <label for="email" class="form-label">
+                            Email address
+                        </label>
+
+                        <input type="email"
+                               class="form-control"
+                               id="email"
+                               placeholder="name@example.com" />
+                    </div>
+
+                    <div class="col-12">
+                        <label for="requestType" class="form-label">
+                            What can we help you with?
+                        </label>
+
+                        <select class="form-select" id="requestType">
+                            <option value="" selected disabled>
+                                Select request type
+                            </option>
+
+                            <option value="account">
+                                Request an account
+                            </option>
+
+                            <option value="question">
+                                General question
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="message" class="form-label">
+                            Message <span class="optional">(optional)</span>
+                        </label>
+
+                        <textarea class="form-control"
+                                  id="message"
+                                  rows="4"
+                                  placeholder="Tell us a little more..."></textarea>
+                    </div>
+
+                    <div class="col-12">
+
+                        <button type="button"
+                                class="btn btn-dark form-button w-100 d-flex justify-content-between align-items-center">
+                            Send request
+                            <span>↗</span>
+                        </button>
+
+                        <p class="form-note mt-3 mb-0">
+                            This form is currently a visual demo and does not send messages.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>

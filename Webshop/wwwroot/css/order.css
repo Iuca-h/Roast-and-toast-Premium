@@ -1,0 +1,134 @@
+
+/* =========================
+   MY ORDERS
+========================= */
+
+.orders-count {
+    color: var(--color-secondary);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+}
+
+.order-card {
+    background-color: var(--color-white);
+    border: 1px solid #E5E8ED;
+    box-shadow: 4px 4px 0 var(--color-surface);
+    transition: border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
+}
+
+.order-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 5px 5px 0 var(--color-surface);
+    transform: translateY(-2px);
+}
+
+.order-card-label {
+    color: var(--color-secondary);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+}
+
+.order-card-number {
+    color: var(--color-primary);
+    font-size: 1.15rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.order-card-date {
+    color: var(--color-secondary);
+    font-size: 0.78rem;
+}
+
+.order-card-value {
+    color: var(--color-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.order-card-value span {
+    color: var(--color-secondary);
+    font-size: 0.8rem;
+}
+
+.order-card-price {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.order-status {
+    display: inline-block;
+    padding: 7px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.order-status-paid {
+    background-color: #E8F1EB;
+    color: #3E7652;
+}
+
+.order-status-other {
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+}
+
+.order-card-divider {
+    border-top: 1px solid #E5E8ED;
+}
+
+.orders-button {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 35px;
+    padding: 11px 16px;
+    border-radius: 0;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.orders-button:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* EMPTY STATE */
+
+.orders-empty {
+    background-color: var(--color-white);
+    border: 1px solid #E5E8ED;
+    box-shadow: 6px 6px 0 var(--color-surface);
+}
+
+.orders-empty-icon {
+    width: 76px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    font-size: 2rem;
+}
+
+.orders-empty-title {
+    color: var(--color-primary);
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.orders-empty-title span {
+    color: var(--color-accent);
+}

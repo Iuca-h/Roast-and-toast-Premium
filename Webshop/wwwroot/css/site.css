@@ -1,33 +1,99 @@
-html {
-  font-size: 14px;
-}
+@import url("./landingPage.css");
+@import url("./loginPage.css");
+@import url("./products.css");
+@import url("./productDescription.css");
+@import url("./cart.css");
+@import url("./checkout.css");
+@import url("./payment.css");
+@import url('./confirmation.css');
+@import url('./order.css');
+@import url('./orderDetails.css');
+@import url('./setup.css');
+@import url('./admin.css');
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+/* GENERAL */
+:root {
+    --font-primary: 'Outfit', sans-serif;
+    --font-accent: 'Zen Dots', sans-serif;
+    
+    --color-primary: #243B5A;
+    --color-accent: #C47750;
+    --color-secondary: #8996A5;
+    
+    --color-background: #f8f9fa;
+    --color-surface: #E9EDF1;
+    --color-white: #FFFFFF;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: var(--font-primary);
+    font-weight: 400;
+    background-color: var(--color-background);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+}
+
+.text-blue {
+    color: var(--color-primary) !important;
+}
+
+.bg-blue {
+    background-color: var(--color-primary) !important;
+}
+
+.nav-link:hover {
+    color: var(--color-accent) !important;
+}
+
+.accent-text,
+.price,
+.special-heading {
+    font-family: var(--font-accent) !important;
+}
+
+.blur-bg {
+    backdrop-filter: blur(10px);
+}
+
+
+/* FOOTER */
+.footer-brand {
+    font-family: var(--font-accent);
+    font-size: 1.8rem;
+}
+
+.footer-heading {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+}
+
+.footer-link {
+    color: #c4d0dc;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+    color: #ffffff;
+}
+
+/* IDK */
+
+/* .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+    text-align: start;
 }
 
 .table-scroll {
@@ -41,18 +107,21 @@ body {
     position: sticky;
     top: 0;
     z-index: 1;
-    background-color: var(--bs-body-bg); /* must be opaque, or rows show through */
-    box-shadow: inset 0 -1px 0 var(--bs-border-color); /* replaces the bottom border, which disappears when sticky */
-}
+    background-color: var(--bs-body-bg); 
+    box-shadow: inset 0 -1px 0 var(--bs-border-color); 
+} */
+
+
+/* BLUR FOR PROFILE */
 
 .blured > * {
-  filter: blur(4px);
-  transition: filter 0.2s ease-in-out;
+    filter: blur(4px);
+    transition: filter 0.2s ease-in-out;
 }
 
 .blured > *:hover {
-  filter: blur(0);
-  cursor: none;
+    filter: blur(0);
+    cursor: none;
 }
 
 .blured {
@@ -61,7 +130,7 @@ body {
 }
 
 .blured.blured-bg::after {
-  background: rgba(0, 0, 0, 1);
+    background: rgba(0, 0, 0, 1);
 }
 
 .blured::after {
@@ -80,4 +149,101 @@ body {
 
 .blured:hover::after {
     opacity: 0;
+}
+
+
+.text-accent {
+    color: var(--color-accent);
+}
+
+.privacy-updated {
+    color: var(--color-secondary);
+    font-size: .85rem;
+}
+
+.privacy-card {
+    width: 100%;
+    background-color: var(--color-white);
+    border: 1px solid #E5E8ED;
+    box-shadow: 8px 8px 0 var(--color-surface);
+}
+
+.privacy-section {
+    position: relative;
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #E5E8ED;
+}
+
+.privacy-section:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.privacy-number {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--color-accent);
+    font-family: var(--font-accent);
+    font-size: .75rem;
+    letter-spacing: .1em;
+}
+
+.privacy-section h2 {
+    margin-bottom: 14px;
+    color: var(--color-primary);
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.privacy-section p,
+.privacy-section li {
+    color: #647386;
+    font-size: .95rem;
+    line-height: 1.8;
+}
+
+.privacy-section ul {
+    padding-left: 22px;
+    margin-top: 12px;
+}
+
+.privacy-section li {
+    padding-left: 5px;
+    margin-bottom: 6px;
+}
+
+.privacy-section strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.privacy-contact {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 10px;
+    padding: 12px 16px;
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    color: var(--color-white);
+    font-size: .9rem;
+    text-decoration: none;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+.privacy-contact:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-white);
+}
+
+.privacy-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    color: var(--color-secondary);
+    font-family: var(--font-accent);
+    font-size: .65rem;
+    letter-spacing: .1em;
 }
