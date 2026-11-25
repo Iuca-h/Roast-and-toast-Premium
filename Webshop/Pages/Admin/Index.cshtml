@@ -1,51 +1,290 @@
 ﻿@page
-@using Microsoft.CodeAnalysis.Scripting
+@using System.Text.Json
 @model Webshop.Pages.Admin.IndexModel
+
 @{
-    ViewData["Title"] = "User management";
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container-fluid shadow-lg p-3 my-5">
-    <div class="container-md">
-        <h1>Users</h1>
+<div class="container-fluid admin-page">
 
-        @if (TempData["Message"] is string message)
+    <div class="admin-header mb-4">
+        <div>
+            <h1 class="login-title mt-2 mb-1">Dashboard.</h1>
+            <p class="login-description mb-0">
+                Overview of your webshop and its activity.
+            </p>
+        </div>
+
+        <div class="admin-header-label">
+            <i class="bi bi-grid-1x2-fill me-2"></i>
+            ADMINISTRATION
+        </div>
+    </div>
+
+    @if (TempData["Message"] is string message)
+    {
+        <div class="alert admin-alert mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            @message
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-top">
+                    <span class="admin-stat-label">TOTAL USERS</span>
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="admin-stat-value accent-text">@Model.TotalUsers</div>
+                <div class="admin-stat-description">Registered accounts</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-top">
+                    <span class="admin-stat-label">TOTAL ORDERS</span>
+                    <i class="bi bi-bag"></i>
+                </div>
+                <div class="admin-stat-value accent-text">@Model.TotalOrders</div>
+                <div class="admin-stat-description">All customer orders</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-top">
+                    <span class="admin-stat-label">PRODUCTS</span>
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="admin-stat-value accent-text">@Model.TotalProducts</div>
+                <div class="admin-stat-description">Products in catalogue</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="admin-stat-card admin-stat-revenue">
+                <div class="admin-stat-top">
+                    <span class="admin-stat-label">PAID REVENUE</span>
+                    <i class="bi bi-currency-euro"></i>
+                </div>
+                <div class="admin-stat-value accent-text">
+                    € @((Model.TotalRevenueCents / 100m).ToString("N2"))
+                </div>
+                <div class="admin-stat-description">Successful payments only</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-12 col-lg-5">
+            <section class="admin-card h-100">
+                <div class="admin-card-header">
+                    <div>
+                        <span class="admin-section-label">OVERVIEW</span>
+                        <h2 class="admin-card-title">Order status</h2>
+                    </div>
+                    <i class="bi bi-pie-chart admin-card-icon"></i>
+                </div>
+
+                <div class="admin-chart-container admin-doughnut-container">
+                    @if (Model.TotalOrders > 0)
+                    {
+                        <canvas id="orderStatusChart"></canvas>
+                    }
+                    else
+                    {
+                        <div class="admin-empty-chart">
+                            <i class="bi bi-pie-chart"></i>
+                            <span>No orders available yet.</span>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12 col-lg-7">
+            <section class="admin-card h-100">
+                <div class="admin-card-header">
+                    <div>
+                        <span class="admin-section-label">LAST 7 DAYS</span>
+                        <h2 class="admin-card-title">Order activity</h2>
+                    </div>
+                    <i class="bi bi-bar-chart-line admin-card-icon"></i>
+                </div>
+
+                <div class="admin-chart-container">
+                    <canvas id="ordersPerDayChart"></canvas>
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <!-- Recent orders -->
+    <section class="admin-card mb-4">
+
+        <div class="admin-card-header">
+            <div>
+                <span class="admin-section-label">SHOP ACTIVITY</span>
+                <h2 class="admin-card-title">Recent orders</h2>
+            </div>
+
+            <span class="admin-count">
+                @Model.RecentOrders.Count RECORDS
+            </span>
+        </div>
+
+        @if (Model.RecentOrders.Count == 0)
         {
-            <div class="alert alert-success">@message</div>
+            <div class="admin-empty-state">
+                No orders have been placed yet.
+            </div>
         }
+        else
+        {
+            <div class="table-scroll" style="--table-max-height: 22rem;">
+                <table class="table admin-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@order.OrderNumber</strong>
+                                </td>
+                                <td>
+                                    <div class="admin-customer-name">
+                                        @order.CustomerName
+                                    </div>
+                                    <div class="admin-table-muted">
+                                        @order.Email
+                                    </div>
+                                </td>
+                                <td>
+                                    @order.CreatedAt.ToString("dd MMM yyyy")
+                                </td>
+                                <td class="admin-price">
+                                    €@((order.TotalPriceCents / 100m).ToString("N2"))
+                                </td>
+                                <td>
+                                    <span class="admin-order-status">
+                                        @order.OrderStatus
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
 
-        <div class="table-scroll" style="--table-max-height: 20rem;">
-            <table class="table table-hover align-middle mb-0">
+    <!-- User management -->
+    <section class="admin-card mb-4">
+
+        <div class="admin-card-header">
+            <div>
+                <span class="admin-section-label">ACCOUNT MANAGEMENT</span>
+                <h2 class="admin-card-title">Users</h2>
+            </div>
+
+            <span class="admin-count">
+                @Model.Users.Count USERS
+            </span>
+        </div>
+
+        <form method="post" asp-page-handler="Create" class="admin-create-form mb-4">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger small mb-3"></div>
+
+            <label asp-for="Input.Email" class="admin-label">
+                Create a new user
+            </label>
+
+            <div class="row g-2">
+                <div class="col-12 col-md">
+                    <input asp-for="Input.Email"
+                           class="form-control admin-input"
+                           placeholder="name@example.com" />
+                </div>
+
+                <div class="col-12 col-md-auto">
+                    <button type="submit" class="btn admin-button w-100">
+                        <i class="bi bi-plus-lg me-2"></i>
+                        Create user
+                    </button>
+                </div>
+            </div>
+
+            <span asp-validation-for="Input.Email"
+                  class="text-danger small"></span>
+        </form>
+
+        <div class="table-scroll" style="--table-max-height: 22rem;">
+            <table class="table admin-table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Email</th>
                         <th>Roles</th>
                         <th>Verified</th>
-                        <th></th>
+                        <th class="text-end">Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var user in Model.Users)
                     {
                         <tr>
-                            <td>@user.Email</td>
+                            <td class="admin-customer-name">
+                                @user.Email
+                            </td>
+
                             <td>@string.Join(", ", user.Roles)</td>
+
                             <td>
                                 @if (user.IsVerified)
                                 {
-                                    <span class="badge text-bg-success">Verified</span>
+                                    <span class="admin-badge admin-badge-success">
+                                        Verified
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge text-bg-danger">Unverified</span>
+                                    <span class="admin-badge admin-badge-danger">
+                                        Unverified
+                                    </span>
                                 }
                             </td>
+
                             <td>
-                                <form class="d-flex justify-content-end" method="post" asp-page-handler="Delete"
-                                    onsubmit="return confirm('Delete @user.Email?');">
+                                <form class="d-flex justify-content-end"
+                                      method="post"
+                                      asp-page-handler="Delete"
+                                      onsubmit="return confirm('Delete @user.Email?');">
+
                                     <input type="hidden" name="id" value="@user.Id" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete user">
-                                        <i class="bi bi-trash"></i> Verwijder
+
+                                    <button type="submit"
+                                            class="btn admin-delete-button"
+                                            title="Delete user">
+                                        <i class="bi bi-trash"></i>
+                                        Delete
                                     </button>
                                 </form>
                             </td>
@@ -54,56 +293,61 @@
                 </tbody>
             </table>
         </div>
+    </section>
 
-        <br/>
+    <!-- Product stock -->
+    <section class="admin-card mb-2">
 
-        <h2>Create user</h2>
-
-        <form method="post" asp-page-handler="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            
-            <div class="mb-2 form-floating d-flex">
-                <input asp-for="Input.Email" class="form-control col rounded-end-0" id="emailInput" placeholder="name@example.com" />
-                <label asp-for="Input.Email" for="emailInput" class="form-label "></label>
-                <button type="submit" class="btn btn-primary col col-auto rounded-start-0">Create user</button> 
+        <div class="admin-card-header">
+            <div>
+                <span class="admin-section-label">INVENTORY MANAGEMENT</span>
+                <h2 class="admin-card-title">Product stock</h2>
             </div>
-            <span asp-validation-for="Input.Email" class="text-danger"></span>
 
-            
-        </form>
-    </div>
-</div>
-
-<div class="container-fluid shadow-lg p-3 my-5">
-    <div class="container-md">
-        <h2>Product stock</h2>
+            <span class="admin-count">
+                @Model.Products.Count PRODUCTS
+            </span>
+        </div>
 
         <div class="table-scroll" style="--table-max-height: 30rem;">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table admin-table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Product</th>
                         <th style="width: 10rem;">Stock</th>
-                        <th style="width: 12rem;"></th>
+                        <th class="text-end" style="width: 8rem;">Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var product in Model.Products)
                     {
                         <tr>
-                            <td>@product.Name</td>
+                            <td class="admin-customer-name">
+                                @product.Name
+                            </td>
+
                             <td>
-                                <form id="stock-@product.Id" method="post" asp-page-handler="SetStock">
-                                    <input type="hidden" name="productId" value="@product.Id" />
-                                    <input type="number" min="0" name="stockAmount"
+                                <form id="stock-@product.Id"
+                                      method="post"
+                                      asp-page-handler="SetStock">
+
+                                    <input type="hidden"
+                                           name="productId"
+                                           value="@product.Id" />
+
+                                    <input type="number"
+                                           min="0"
+                                           name="stockAmount"
                                            value="@product.StockAmount"
-                                           class="form-control form-control-sm" />
+                                           class="form-control admin-input admin-stock-input" />
                                 </form>
                             </td>
+
                             <td class="text-end">
-                                <button type="submit" form="stock-@product.Id"
-                                        class="btn btn-sm btn-outline-primary">
+                                <button type="submit"
+                                        form="stock-@product.Id"
+                                        class="btn admin-save-button">
                                     Save
                                 </button>
                             </td>
@@ -112,9 +356,135 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
+
 </div>
 
-<script defer>
-    document.querySelector('body>div.container').classList.remove('container')
-</script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/lib/chart.js/chart.umd.js"></script>
+
+    <script>
+        const chartColors = {
+            primary: "#243B5A",
+            accent: "#C47750",
+            secondary: "#8996A5",
+            light: "#DDE2E8",
+            background: "#E9EDF1"
+        };
+
+        const orderStatusLabels = @Html.Raw(JsonSerializer.Serialize(Model.OrderStatusLabels));
+        const orderStatusValues = @Html.Raw(JsonSerializer.Serialize(Model.OrderStatusValues));
+
+        const orderDayLabels = @Html.Raw(JsonSerializer.Serialize(Model.OrderDayLabels));
+        const orderDayValues = @Html.Raw(JsonSerializer.Serialize(Model.OrderDayValues));
+
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.color = chartColors.secondary;
+
+        const statusCanvas = document.getElementById("orderStatusChart");
+
+        if (statusCanvas) {
+            new Chart(statusCanvas, {
+                type: "doughnut",
+
+                data: {
+                    labels: orderStatusLabels,
+                    datasets: [{
+                        data: orderStatusValues,
+                        backgroundColor: [
+                            chartColors.primary,
+                            chartColors.accent,
+                            chartColors.secondary,
+                            "#B7C1CB",
+                            "#D9DEE4"
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 5
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "68%",
+                    animation: false,
+
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: "rect",
+                                padding: 20,
+                                boxWidth: 9,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const ordersCanvas = document.getElementById("ordersPerDayChart");
+
+        if (ordersCanvas) {
+            new Chart(ordersCanvas, {
+                type: "bar",
+
+                data: {
+                    labels: orderDayLabels,
+                    datasets: [{
+                        label: "Orders",
+                        data: orderDayValues,
+                        backgroundColor: chartColors.primary,
+                        hoverBackgroundColor: chartColors.accent,
+                        borderRadius: 0,
+                        borderSkipped: false,
+                        maxBarThickness: 42
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: "#E9EDF1"
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}

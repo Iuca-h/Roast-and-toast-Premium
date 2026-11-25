@@ -1,0 +1,317 @@
+
+/* ADMIN DASHBOARD */
+
+.admin-page {
+    color: var(--color-primary);
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+}
+
+.admin-header-label {
+    color: var(--color-secondary);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+}
+
+.admin-alert {
+    border-radius: 0;
+    border: 1px solid #DDE2E8;
+    border-left: 3px solid var(--color-accent);
+    background-color: var(--color-white);
+    color: var(--color-primary);
+}
+
+/* STATISTICS */
+
+.admin-stat-card {
+    height: 100%;
+    min-height: 145px;
+    padding: 20px;
+    background-color: var(--color-white);
+    border: 1px solid #E5E8ED;
+    box-shadow: 4px 4px 0 var(--color-surface);
+}
+
+.admin-stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.admin-stat-top i {
+    color: var(--color-accent);
+    font-size: 1.3rem;
+}
+
+.admin-stat-label {
+    color: var(--color-secondary);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+}
+
+.admin-stat-value {
+    color: var(--color-primary);
+    font-size: 1.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.admin-stat-description {
+    margin-top: 5px;
+    color: var(--color-secondary);
+    font-size: .78rem;
+}
+
+.admin-stat-revenue .admin-stat-value {
+    color: var(--color-accent);
+}
+
+/* CONTENT CARDS */
+
+.admin-card {
+    min-width: 0;
+    padding: 24px;
+    background-color: var(--color-white);
+    border: 1px solid #E5E8ED;
+    box-shadow: 5px 5px 0 var(--color-surface);
+}
+
+.admin-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-section-label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--color-secondary);
+    font-size: .67rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+}
+
+.admin-card-title {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.admin-card-icon {
+    color: var(--color-accent);
+    font-size: 1.5rem;
+}
+
+.admin-count {
+    color: var(--color-secondary);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    white-space: nowrap;
+}
+
+/* CHARTS */
+
+.admin-chart-container {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    min-width: 0;
+}
+
+.admin-doughnut-container {
+    height: 280px;
+}
+
+.admin-empty-chart {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-secondary);
+    font-size: .9rem;
+}
+
+.admin-empty-chart i {
+    font-size: 2rem;
+    color: var(--color-accent);
+}
+
+/* TABLES */
+
+.admin-table {
+    color: var(--color-primary);
+    font-size: .88rem;
+}
+
+.admin-table thead th {
+    padding: 13px 14px;
+    background-color: #F4F6F8;
+    color: var(--color-secondary);
+    border-bottom: 1px solid #E5E8ED;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.admin-table tbody td {
+    padding: 14px;
+    border-bottom-color: #EDF0F3;
+    vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.admin-table > :not(caption) > * > * {
+    box-shadow: none;
+}
+
+.admin-table.table-hover tbody tr:hover > * {
+    background-color: #F8F9FA;
+    color: var(--color-primary);
+}
+
+.admin-customer-name {
+    color: var(--color-primary);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.admin-table-muted {
+    margin-top: 3px;
+    color: var(--color-secondary);
+    font-size: .75rem;
+    overflow-wrap: anywhere;
+}
+
+.admin-price {
+    color: var(--color-accent) !important;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.admin-order-status {
+    display: inline-block;
+    padding: 6px 10px;
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    font-size: .72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.admin-empty-state {
+    padding: 35px 15px;
+    color: var(--color-secondary);
+    text-align: center;
+    font-size: .9rem;
+}
+
+/* USER MANAGEMENT */
+
+.admin-create-form {
+    padding: 20px;
+    background-color: #F7F8F9;
+    border: 1px solid #E5E8ED;
+}
+
+.admin-label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--color-primary);
+    font-size: .85rem;
+    font-weight: 500;
+}
+
+.admin-input {
+    min-height: 43px;
+    border-radius: 0;
+    border: 1px solid #DDE2E8;
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    box-shadow: none;
+}
+
+.admin-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(196, 119, 80, .12);
+}
+
+.admin-button,
+.admin-save-button {
+    min-height: 43px;
+    padding: 10px 17px;
+    border-radius: 0;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-size: .85rem;
+    font-weight: 500;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+.admin-button:hover,
+.admin-save-button:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: var(--color-white);
+}
+
+.admin-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.admin-badge-success {
+    background-color: #E8F1EB;
+    color: #3E7652;
+}
+
+.admin-badge-danger {
+    background-color: #F7EAEA;
+    color: #A64B4B;
+}
+
+.admin-delete-button {
+    padding: 7px 10px;
+    border-radius: 0;
+    border: 1px solid #D9A6A6;
+    color: #A64B4B;
+    font-size: .78rem;
+    transition: background-color .2s ease, color .2s ease;
+}
+
+.admin-delete-button:hover {
+    background-color: #A64B4B;
+    border-color: #A64B4B;
+    color: var(--color-white);
+}
+
+/* STOCK */
+
+.admin-stock-input {
+    min-height: 36px;
+    max-width: 110px;
+    font-size: .85rem;
+}
