@@ -1,35 +1,104 @@
 ﻿@page
 @model Webshop.Areas.Identity.Pages.Account.SetupModel
+
 @{
     ViewData["Title"] = "Account setup";
 }
 
-<h1>Set up your account</h1>
-<p>Enter the temporary password you were given, then choose a new password. After that you'll connect an authenticator app.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
 
-<form method="post" id="setupForm">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="setup-card p-4 p-md-5">
 
-    <div class="mb-3">
-        <label asp-for="Input.TempPassword" class="form-label"></label>
-        <input asp-for="Input.TempPassword" class="form-control" autocomplete="current-password" />
-        <span asp-validation-for="Input.TempPassword" class="text-danger"></span>
-    </div>
+                <div class="setup-icon mb-4">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
 
-    <div class="mb-3">
-        <label asp-for="Input.NewPassword" class="form-label"></label>
-        <input asp-for="Input.NewPassword" class="form-control" autocomplete="new-password" />
+                <span class="login-label">FIRST-TIME ACCESS</span>
 
-        <div class="progress mt-2" style="height: 10px;">
-            <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                <h1 class="login-title mt-2">Set up your account.</h1>
+
+                <p class="login-description mb-4">
+                    Enter the temporary password you were given, then create
+                    a new secure password. After that, you'll connect an
+                    authenticator app.
+                </p>
+
+                <div class="setup-notice mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    You'll need your temporary password to complete this setup.
+                </div>
+
+                <form method="post" id="setupForm">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Input.TempPassword"
+                               class="setup-label"></label>
+
+                        <input asp-for="Input.TempPassword"
+                               class="form-control setup-input"
+                               autocomplete="current-password"
+                               placeholder="Enter temporary password" />
+
+                        <span asp-validation-for="Input.TempPassword"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Input.NewPassword"
+                               class="setup-label"></label>
+
+                        <input asp-for="Input.NewPassword"
+                               class="form-control setup-input"
+                               autocomplete="new-password"
+                               placeholder="Create a new password" />
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="setup-strength-label">PASSWORD STRENGTH</span>
+                            <span class="setup-strength-hint">Live validation</span>
+                        </div>
+
+                        <div class="progress setup-progress mt-2">
+                            <div id="passwordStrength"
+                                 class="progress-bar"
+                                 role="progressbar"
+                                 style="width: 0%">
+                            </div>
+                        </div>
+
+                        <div id="passwordMessage"
+                             class="small mt-2"
+                             aria-live="polite"></div>
+
+                        <span asp-validation-for="Input.NewPassword"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="setup-divider my-4"></div>
+
+                    <button id="continueSubmit"
+                            type="submit"
+                            class="btn setup-button w-100"
+                            disabled>
+                        <span>Continue to authenticator setup</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <p class="setup-footer mt-4 mb-0 text-center">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Your account security matters.
+                    </p>
+
+                </form>
+            </div>
+
         </div>
-        <div id="passwordMessage" class="small mt-1" aria-live="polite"></div>
-
-        <span asp-validation-for="Input.NewPassword" class="text-danger"></span>
     </div>
-
-    <button id="continueSubmit" type="submit" class="btn btn-primary" disabled>Continue</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -52,7 +121,7 @@
             function render(width, barClass, text, textClass) {
                 progressBar.style.width = width;
                 progressBar.className = "progress-bar " + barClass;
-                message.className = "small mt-1 " + textClass;
+                message.className = "small mt-2 " + textClass;
                 message.textContent = text;
                 submitButton.disabled = !passwordValid;
             }
@@ -93,7 +162,6 @@
 
                     const result = await response.json();
 
-                    // Ignore responses for a password the user has since changed
                     if (currentRequest !== requestNumber) return;
 
                     if (result.valid) {
@@ -112,7 +180,6 @@
             }
 
             newInput.addEventListener("input", () => {
-                // Invalidate any request still in flight
                 requestNumber++;
                 passwordValid = false;
                 submitButton.disabled = true;

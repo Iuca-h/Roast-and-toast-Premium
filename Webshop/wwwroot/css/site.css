@@ -8,6 +8,7 @@
 @import url('./confirmation.css');
 @import url('./order.css');
 @import url('./orderDetails.css');
+@import url('./setup.css');
 
 /* GENERAL */
 :root {

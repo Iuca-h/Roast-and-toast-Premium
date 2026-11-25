@@ -1,0 +1,112 @@
+
+/* ACCOUNT SETUP */
+
+.setup-card {
+    width: 100%;
+    background-color: var(--color-white);
+    border: 1px solid #E5E8ED;
+    box-shadow: 8px 8px 0 var(--color-surface);
+}
+
+.setup-icon {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    font-size: 1.7rem;
+}
+
+.setup-notice {
+    padding: 14px 16px;
+    background-color: #F0F2F5;
+    border-left: 3px solid var(--color-accent);
+    color: var(--color-secondary);
+    font-size: .85rem;
+    line-height: 1.6;
+}
+
+.setup-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-primary);
+    font-size: .85rem;
+    font-weight: 500;
+}
+
+.setup-input {
+    min-height: 50px;
+    border-radius: 0;
+    border: 1px solid #DDE2E8;
+    background-color: #FAFAFA;
+    color: var(--color-primary);
+    box-shadow: none;
+}
+
+.setup-input:focus {
+    border-color: var(--color-accent);
+    background-color: var(--color-white);
+    box-shadow: 0 0 0 3px rgba(196, 119, 80, .12);
+}
+
+.setup-strength-label {
+    color: var(--color-primary);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+}
+
+.setup-strength-hint {
+    color: var(--color-secondary);
+    font-size: .75rem;
+}
+
+.setup-progress {
+    height: 8px;
+    border-radius: 0;
+    background-color: var(--color-surface);
+}
+
+.setup-progress .progress-bar {
+    border-radius: 0;
+    transition: width .25s ease;
+}
+
+.setup-divider {
+    border-top: 1px solid #E5E8ED;
+}
+
+.setup-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 18px;
+    border-radius: 0;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-weight: 500;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+.setup-button:hover:not(:disabled) {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-white);
+}
+
+.setup-button:disabled {
+    background-color: #8996A5;
+    border-color: #8996A5;
+    color: var(--color-white);
+    cursor: not-allowed;
+    opacity: .65;
+}
+
+.setup-footer {
+    color: var(--color-secondary);
+    font-size: .8rem;
+}
