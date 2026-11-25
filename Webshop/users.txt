@@ -1,4 +1,3 @@
-
 dotnet user-secrets set "SeedDba:Email" "dba@example.com"
 dotnet user-secrets set "SeedDba:Password" "D-baassword1243!"
 dotnet user-secrets set "SeedAdmin:Email" "admin@example.com"
