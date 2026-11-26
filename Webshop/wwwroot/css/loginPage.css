@@ -194,3 +194,222 @@
 }
 
 
+
+/* ACCOUNT LAYOUT */
+
+.account-page {
+    padding-bottom: 80px !important;
+}
+
+.account-title {
+    margin-top: 12px;
+    margin-bottom: 14px;
+}
+
+.account-nav-card,
+.account-content {
+    background: var(--color-white, #FFFFFF);
+    border: 1px solid #E5E8ED;
+    box-shadow: 8px 8px 0 #E9EDF1;
+}
+
+.account-nav-card {
+    padding: 25px 20px;
+    height: 100%;
+}
+
+.account-content {
+    padding: clamp(24px, 4vw, 45px);
+    min-height: 350px;
+}
+
+/* ACCOUNT NAVIGATION */
+
+.account-nav-label {
+    display: block;
+    margin-bottom: 22px;
+}
+
+.account-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.account-nav li {
+    border-top: 1px solid #E9EDF1;
+}
+
+.account-nav li:last-child {
+    border-bottom: 1px solid #E9EDF1;
+}
+
+.account-nav a {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 15px 8px;
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease,
+                background-color 0.2s ease;
+}
+
+.account-nav a span {
+    color: #AAB3BE;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.account-nav a:hover {
+    color: var(--color-accent);
+}
+
+.account-nav a.active {
+    color: var(--color-primary);
+    background-color: #F5F6F7;
+    border-left: 3px solid var(--color-accent);
+    padding-left: 10px;
+}
+
+.account-nav a.active span {
+    color: var(--color-accent);
+}
+
+/* ACCOUNT CONTENT */
+
+.account-content h1,
+.account-content h2,
+.account-content h3 {
+    color: var(--color-primary);
+    font-family: var(--font-primary);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+}
+
+.account-content h1 {
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    margin-bottom: 12px;
+}
+
+.account-content h2 {
+    font-size: 1.5rem;
+}
+
+.account-content p {
+    color: var(--color-secondary);
+    line-height: 1.7;
+}
+
+/* INPUTS */
+
+.account-content .form-control,
+.account-content .form-select {
+    border-radius: 0;
+    border: 1px solid #DDE2E8;
+    background-color: #FAFAFA;
+    color: var(--color-primary);
+    box-shadow: none;
+    padding: 12px 14px;
+}
+
+.account-content .form-control:focus,
+.account-content .form-select:focus {
+    border-color: var(--color-accent);
+    background-color: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(189, 83, 37, 0.12);
+}
+
+.account-content label {
+    color: var(--color-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 7px;
+}
+
+/* CHECKBOXES */
+
+.account-content .form-check-input {
+    border-radius: 0;
+    border-color: #B6BFC9;
+    box-shadow: none;
+}
+
+.account-content .form-check-input:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.account-content .form-check-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(189, 83, 37, 0.12);
+}
+
+/* BUTTONS */
+
+.account-content .btn {
+    border-radius: 0;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.account-content .btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #FFFFFF;
+}
+
+.account-content .btn-primary:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.account-content .btn-secondary {
+    background-color: #E9EDF1;
+    border-color: #E9EDF1;
+    color: var(--color-primary);
+}
+
+/* LINKS */
+
+.account-content a:not(.btn) {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.account-content a:not(.btn):hover {
+    color: var(--color-primary);
+}
+
+/* VALIDATION */
+
+.account-content .text-danger,
+.account-content .field-validation-error {
+    font-size: 0.85rem;
+}
+
+.account-content .validation-summary-errors {
+    color: #B54736;
+    font-size: 0.9rem;
+}
+
+/* TABLES */
+
+.account-content table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.account-content th,
+.account-content td {
+    padding: 13px 10px;
+    border-bottom: 1px solid #E9EDF1;
+    color: var(--color-primary);
+}
