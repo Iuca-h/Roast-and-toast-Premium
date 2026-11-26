@@ -20,5 +20,11 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.3" />
     <PackageReference Include="MySql.EntityFrameworkCore" Version="10.*" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Data/ProductImages/**/*">
+        <LogicalName>ProductImages/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+</ItemGroup>
 
 </Project>

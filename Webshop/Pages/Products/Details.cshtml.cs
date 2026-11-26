@@ -77,6 +77,21 @@ public class DetailsModel : PageModel
         return NotFound();
     }
 
-    return File(imageData, "image/png");
+    var image = await _context.Products
+    .Where(p => p.Id == id)
+    .Select(p => new
+    {
+        p.ImageData,
+        p.ImageContentType
+    })
+    .FirstOrDefaultAsync();
+
+if (image?.ImageData == null || image.ImageData.Length == 0)
+    return NotFound();
+
+return File(
+    image.ImageData,
+    image.ImageContentType ?? "application/octet-stream"
+);
 }
 }

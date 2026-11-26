@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace Webshop.Data;
 
@@ -6,11 +7,10 @@ public static class ProductSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext db)
     {
-        // Only seed when there are no products yet
-        if (await db.Products.AnyAsync())
-            return;
-
-        var products = new List<Product>
+        // Create products only if the database is empty
+        if (!await db.Products.AnyAsync())
+        {
+            var products = new List<Product>
         {
             P("Dough Mixer", "DM-200 Pro", 125000, "20 kg dough", 1.5, "Stainless Steel", "800 × 600 × 900 mm",
               "The DM-200 Pro Dough Mixer is a professional bakery machine designed to simplify and improve the dough preparation process. It is suitable for small and medium-sized bakeries that need reliable equipment for daily production. Its powerful motor ensures consistent mixing, helping to achieve a smooth and evenly prepared dough. The stainless steel construction provides durability, resistance to corrosion and easy cleaning after use. Its compact design allows it to fit comfortably into professional kitchens without taking up too much workspace. The machine is suitable for preparing bread dough, pizza dough, pastry mixtures and other bakery products. It helps reduce manual work and ensures consistent results throughout the production process."),
@@ -73,26 +73,110 @@ public static class ProductSeeder
               "The CC-500 Cooling Conveyor is an industrial bakery machine designed to transport freshly baked products while allowing them to cool before packaging or further processing. It is particularly useful in bakeries and food factories where large quantities of bread, pastries and other baked goods are produced continuously. The conveyor system moves products through a designated cooling area, allowing heat to dissipate gradually before the products reach the next production stage. Its adjustable conveyor speed helps operators coordinate the cooling process with the rest of the production line. The machine can be integrated with ovens, packaging equipment and other bakery production systems. Its stainless steel construction provides durability and supports hygienic operation in commercial food environments. The CC-500 helps improve production organisation, reduce manual handling and prepare baked products for storage, packaging or distribution."),
         };
 
-        // Each product gets a random starting stock between 0 and 100
-        foreach (var product in products)
-        {
-            product.Stock = new Stock { StockAmount = Random.Shared.Next(0, 101) };
+            // Each product gets a random starting stock between 0 and 100
+            foreach (var product in products)
+            {
+                product.Stock = new Stock
+                {
+                    StockAmount = Random.Shared.Next(0, 101)
+                };
+            }
+
+            db.Products.AddRange(products);
+            await db.SaveChangesAsync();
         }
 
-        db.Products.AddRange(products);
-        await db.SaveChangesAsync();
+        // Add images to existing products that don't have one yet
+        await SeedImagesAsync(db);
     }
 
-    private static Product P(string name, string model, uint priceCents, string capacity, double powerKw,
-        string material, string dimensions, string description) => new()
+    private static async Task SeedImagesAsync(ApplicationDbContext db)
     {
-        Name = name,
-        Model = model,
-        PriceCents = priceCents,
-        Capacity = capacity,
-        PowerKw = (decimal)powerKw,
-        Material = material,
-        Dimensions = dimensions,
-        Description = description,
-    };
+        var products = await db.Products.ToListAsync();
+
+        var assembly = typeof(ProductSeeder).Assembly;
+
+        var resourceNames = assembly.GetManifestResourceNames();
+
+        foreach (var product in products)
+        {
+            // Do not overwrite an existing image
+            if (product.ImageData != null && product.ImageData.Length > 0)
+                continue;
+
+            // Convert model name into image filename
+            // Example: "DM-200 Pro" -> "DM-200-Pro"
+            var fileName = product.Model.Replace(" ", "-");
+
+            var extensions = new[] { ".png", ".jpg", ".jpeg", ".webp" };
+
+            string? resourceName = null;
+            string? extension = null;
+
+            foreach (var ext in extensions)
+            {
+                var expectedName = $"ProductImages/{fileName}{ext}";
+
+                resourceName = resourceNames.FirstOrDefault(
+                    name => name.Equals(expectedName, StringComparison.OrdinalIgnoreCase)
+                );
+
+                if (resourceName != null)
+                {
+                    extension = ext;
+                    break;
+                }
+            }
+
+            if (resourceName == null || extension == null)
+            {
+                Console.WriteLine($"Image not found for product: {product.Model}");
+                continue;
+            }
+
+            await using var stream = assembly.GetManifestResourceStream(resourceName);
+
+            if (stream == null)
+                continue;
+
+            using var memoryStream = new MemoryStream();
+
+            await stream.CopyToAsync(memoryStream);
+
+            product.ImageData = memoryStream.ToArray();
+            product.ImageFileName = fileName + extension;
+
+            product.ImageContentType = extension switch
+            {
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".webp" => "image/webp",
+                _ => "application/octet-stream"
+            };
+
+            Console.WriteLine($"Image added: {product.Model}");
+        }
+
+        await db.SaveChangesAsync();
+    }
+    
+    private static Product P(
+    string name,
+    string model,
+    uint priceCents,
+    string capacity,
+    double powerKw,
+    string material,
+    string dimensions,
+    string description) => new()
+{
+    Name = name,
+    Model = model,
+    PriceCents = priceCents,
+    Capacity = capacity,
+    PowerKw = (decimal)powerKw,
+    Material = material,
+    Dimensions = dimensions,
+    Description = description,
+};
 }
