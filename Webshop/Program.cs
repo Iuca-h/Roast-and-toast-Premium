@@ -127,14 +127,27 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Dba", "DBA");
 });
 
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.IncludeSubDomains = true;
+});
+
 var app = builder.Build();
 
 // Seed roles, users and Products
 using (var scope = app.Services.CreateScope())
 {
-    await RoleSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
-    
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var services = scope.ServiceProvider;
+    var db = services.GetRequiredService<ApplicationDbContext>();
+
+    // Creates the database and tables if they don't exist yet
+    await db.Database.MigrateAsync();
+
+    // Roles are created only if missing, so this is safe on every start
+    await RoleSeeder.SeedAsync(services, app.Configuration);
+
+    // Products are added only when the Products table is empty
     await ProductSeeder.SeedAsync(db);
 }
 
