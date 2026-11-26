@@ -1,0 +1,32 @@
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="container account-page">
+    <div class="mb-5">
+        <h1 class="login-title account-title">
+            Manage <span>account.</span>
+        </h1>
+        <p class="login-description">
+            Manage your personal information and account settings.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <aside class="col-12 col-lg-3">
+            <div class="account-nav-card">
+                <partial name="_ManageNav" />
+            </div>
+        </aside>
+
+        <main class="col-12 col-lg-9">
+            <div class="account-content">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}
