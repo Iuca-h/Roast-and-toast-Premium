@@ -247,3 +247,41 @@ h1, h2, h3, h4, h5, h6 {
     font-size: .65rem;
     letter-spacing: .1em;
 }
+
+/* FAQ */
+.accordion-button {
+    color: var(--color-primary);
+    background-color: var(--color-white);
+    box-shadow: none !important;
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--color-primary);
+    background-color: var(--color-surface);
+}
+
+.accordion-button:focus {
+    border-color: var(--color-accent);
+    box-shadow: none;
+}
+
+.accordion-item {
+    overflow: hidden;
+}
+
+/* Contact */
+.form-control,
+.form-select {
+    border-color: #DDE2E8;
+    border-radius: 8px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 0.2rem rgba(196, 119, 80, 0.15);
+}
+
+.contact-social a {
+    text-decoration: none;
+}

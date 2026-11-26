@@ -41,6 +41,16 @@
                                 orders
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/FAQ/FAQ">
+                                faq
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Contact/Contact">
+                                contact
+                            </a>
+                        </li>
                     }
                     @if (User.IsInRole("DBA") || User.IsInRole("Admin"))
                     {
@@ -108,12 +118,12 @@
 
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a class="footer-link" asp-area="" asp-page="/Contact">
+                            <a class="footer-link" asp-area="" asp-page="/Contact/Contact">
                                 Contact Us
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a class="footer-link" asp-area="" asp-page="/FAQ">
+                            <a class="footer-link" asp-area="" asp-page="/FAQ/FAQ">
                                 FAQ
                             </a>
                         </li>

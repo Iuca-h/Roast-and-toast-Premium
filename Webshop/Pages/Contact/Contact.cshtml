@@ -1,0 +1,219 @@
+@page
+@model Webshop.Pages.ContactModel
+
+@{
+    ViewData["Title"] = "Contact";
+}
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <span class="text-uppercase fw-semibold"
+              style="color: var(--color-accent); letter-spacing: 3px;">
+            Get in touch
+        </span>
+
+        <h1 class="display-4 fw-bold mt-3"
+            style="color: var(--color-primary);">
+            Contact Us
+        </h1>
+
+        <p class="text-secondary mt-3 mx-auto" style="max-width: 650px;">
+            Have a question about our equipment or need assistance?
+            We'd love to hear from you.
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Contact Information -->
+        <div class="col-lg-5">
+
+            <div class="h-100 rounded-4 p-4 p-lg-5 text-white"
+                 style="background-color: var(--color-primary);">
+
+                <h3 class="fw-bold mb-3">Let's talk!</h3>
+
+                <p class="mb-5" style="color: #D5DDE6;">
+                    Whether you're looking for the right equipment
+                    or have a question about an order, we're here to help.
+                </p>
+
+                <div class="d-flex align-items-start gap-3 mb-4">
+                    <div class="rounded-3 p-3"
+                         style="background-color: rgba(255,255,255,0.12);">
+                        <i class="bi bi-envelope fs-4"></i>
+                    </div>
+
+                    <div>
+                        <small style="color: #D5DDE6;">Email</small>
+                        <p class="mb-0 fw-semibold">
+                            info@example.com
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start gap-3 mb-4">
+                    <div class="rounded-3 p-3"
+                         style="background-color: rgba(255,255,255,0.12);">
+                        <i class="bi bi-telephone fs-4"></i>
+                    </div>
+
+                    <div>
+                        <small style="color: #D5DDE6;">Phone</small>
+                        <p class="mb-0 fw-semibold">
+                            +31 (0) 20 123 4567
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start gap-3 mb-5">
+                    <div class="rounded-3 p-3"
+                         style="background-color: rgba(255,255,255,0.12);">
+                        <i class="bi bi-geo-alt fs-4"></i>
+                    </div>
+
+                    <div>
+                        <small style="color: #D5DDE6;">Location</small>
+                        <p class="mb-0 fw-semibold">
+                            The Netherlands
+                        </p>
+                    </div>
+                </div>
+
+                <div class="border-top pt-4"
+                     style="border-color: rgba(255,255,255,0.2) !important;">
+
+                    <p class="small mb-3" style="color: #D5DDE6;">
+                        Follow us
+                    </p>
+
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white fs-4">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+
+                        <a href="#" class="text-white fs-4">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+
+                        <a href="#" class="text-white fs-4">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Contact Form -->
+        <div class="col-lg-7">
+
+            <div class="bg-white rounded-4 shadow-sm p-4 p-lg-5 h-100">
+
+                <h3 class="fw-bold mb-2"
+                    style="color: var(--color-primary);">
+                    Send us a message
+                </h3>
+
+                <p class="text-secondary mb-4">
+                    Fill in the form below and tell us how we can help.
+                </p>
+
+                <form onsubmit="event.preventDefault(); alert('This form is currently for demonstration purposes.');">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                First Name
+                            </label>
+
+                            <input type="text"
+                                   class="form-control py-2"
+                                   placeholder="Your first name"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Last Name
+                            </label>
+
+                            <input type="text"
+                                   class="form-control py-2"
+                                   placeholder="Your last name"
+                                   required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Email Address
+                            </label>
+
+                            <input type="email"
+                                   class="form-control py-2"
+                                   placeholder="you@example.com"
+                                   required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Subject
+                            </label>
+
+                            <select class="form-select py-2" required>
+                                <option value="" selected disabled>
+                                    Select a subject
+                                </option>
+                                <option>Product Information</option>
+                                <option>Order Inquiry</option>
+                                <option>Technical Support</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Message
+                            </label>
+
+                            <textarea class="form-control"
+                                      rows="5"
+                                      placeholder="How can we help you?"
+                                      required></textarea>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit"
+                                    class="btn btn-dark w-100 py-3">
+                                Send Message
+                                <i class="bi bi-arrow-up-right ms-2"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="text-center mt-5 py-4">
+        <h4 class="fw-bold" style="color: var(--color-primary);">
+            We're here to help your bakery grow.
+        </h4>
+
+        <p class="text-secondary mb-0">
+            Roast & Toast — Professional equipment for better baking.
+        </p>
+    </div>
+
+</div>

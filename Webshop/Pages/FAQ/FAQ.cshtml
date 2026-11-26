@@ -1,0 +1,226 @@
+@page
+@model Webshop.Pages.FAQModel
+
+@{
+    ViewData["Title"] = "FAQ";
+}
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <span class="text-uppercase fw-semibold"
+              style="color: var(--color-accent); letter-spacing: 3px;">
+            Need help?
+        </span>
+
+        <h1 class="display-4 fw-bold mt-3"
+            style="color: var(--color-primary);">
+            Frequently Asked Questions
+        </h1>
+
+        <p class="text-secondary mt-3 mx-auto" style="max-width: 650px;">
+            Find answers to the most common questions about our bakery
+            equipment, orders, delivery and services.
+        </p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            <!-- Products -->
+            <h5 class="fw-bold mb-3" style="color: var(--color-primary);">
+                Products & Equipment
+            </h5>
+
+            <div class="accordion mb-5" id="productsAccordion">
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#product1">
+                            What types of bakery equipment do you offer?
+                        </button>
+                    </h2>
+                    <div id="product1" class="accordion-collapse collapse"
+                         data-bs-parent="#productsAccordion">
+                        <div class="accordion-body text-secondary">
+                            We offer a wide range of professional bakery equipment,
+                            including dough mixers, ovens, dough dividers, proofers,
+                            bread slicers and other essential bakery machines.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#product2">
+                            Are your machines suitable for professional bakeries?
+                        </button>
+                    </h2>
+                    <div id="product2" class="accordion-collapse collapse"
+                         data-bs-parent="#productsAccordion">
+                        <div class="accordion-body text-secondary">
+                            Yes! Our equipment is designed for professional use
+                            and supports bakeries of different sizes and production
+                            capacities.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#product3">
+                            Where can I find product specifications?
+                        </button>
+                    </h2>
+                    <div id="product3" class="accordion-collapse collapse"
+                         data-bs-parent="#productsAccordion">
+                        <div class="accordion-body text-secondary">
+                            Each product page contains detailed specifications,
+                            including capacity, power consumption, materials
+                            and dimensions.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Orders -->
+            <h5 class="fw-bold mb-3" style="color: var(--color-primary);">
+                Orders & Payments
+            </h5>
+
+            <div class="accordion mb-5" id="ordersAccordion">
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#order1">
+                            How can I place an order?
+                        </button>
+                    </h2>
+                    <div id="order1" class="accordion-collapse collapse"
+                         data-bs-parent="#ordersAccordion">
+                        <div class="accordion-body text-secondary">
+                            Browse our products, add the equipment you need
+                            to your shopping cart and proceed to checkout.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#order2">
+                            Which payment methods are accepted?
+                        </button>
+                    </h2>
+                    <div id="order2" class="accordion-collapse collapse"
+                         data-bs-parent="#ordersAccordion">
+                        <div class="accordion-body text-secondary">
+                            Available payment methods are displayed during
+                            the checkout process.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#order3">
+                            Can I ask questions before purchasing?
+                        </button>
+                    </h2>
+                    <div id="order3" class="accordion-collapse collapse"
+                         data-bs-parent="#ordersAccordion">
+                        <div class="accordion-body text-secondary">
+                            Absolutely! You can contact our team with any questions
+                            about products, specifications or your order.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Delivery -->
+            <h5 class="fw-bold mb-3" style="color: var(--color-primary);">
+                Delivery & Support
+            </h5>
+
+            <div class="accordion" id="deliveryAccordion">
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#delivery1">
+                            How long does delivery take?
+                        </button>
+                    </h2>
+                    <div id="delivery1" class="accordion-collapse collapse"
+                         data-bs-parent="#deliveryAccordion">
+                        <div class="accordion-body text-secondary">
+                            Delivery times depend on the product and destination.
+                            Please contact us for more information about your order.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed rounded-3 fw-semibold"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#delivery2">
+                            How can I contact customer support?
+                        </button>
+                    </h2>
+                    <div id="delivery2" class="accordion-collapse collapse"
+                         data-bs-parent="#deliveryAccordion">
+                        <div class="accordion-body text-secondary">
+                            You can reach us through the contact page.
+                            Our team will be happy to help you.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="text-center mt-5 p-5 rounded-4"
+         style="background-color: var(--color-surface);">
+
+        <h3 class="fw-bold" style="color: var(--color-primary);">
+            Still have questions?
+        </h3>
+
+        <p class="text-secondary mt-2">
+            Can't find the answer you're looking for? Get in touch with us.
+        </p>
+
+        <a asp-page="/Contact/Contact" class="btn btn-dark mt-3 px-4 py-2">
+            Contact Us <i class="bi bi-arrow-up-right ms-2"></i>
+        </a>
+
+    </div>
+
+</div>
